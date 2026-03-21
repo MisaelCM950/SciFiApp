@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react'; // 1. Import the state "Hook"
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -7,19 +8,16 @@ export default function CalTracker() {
   const [calories, setCalories] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  const router = useRouter();
   const GOAL = 2500;
   const exercise = 0;
-  const remaining = GOAL - calories + EXERCISE;
+  const remaining = GOAL - calories + exercise;
 
   useEffect(()=>{
     setTimeout(()=>{
       setIsLoading(false);
     }, 3000);
   }, []);
-
-  const handleAddFood = () =>{
-    setCalories(calories + 100);
-  };
 
   if(isLoading){
     return(
@@ -51,7 +49,7 @@ export default function CalTracker() {
         <Text style={styles.symbol}>+</Text>
         {/* Block 3: Exercise */}
         <View style={styles.statBlock}>
-          <Text style={styles.statNumber}>{EXERCISE}</Text>
+          <Text style={styles.statNumber}>{exercise}</Text>
           <Text style={styles.statLabel}>Exercise</Text>
         </View>
 
@@ -79,23 +77,23 @@ export default function CalTracker() {
       <View style={styles.diaryItem}>
         {/* The left column */}
         <View style={styles.leftColumn}>
-          <Text style={[styles.foodName, styles.baseText]}>Pan Integral</Text>
+          <Text style={[styles.baseText]}>Pan Integral</Text>
           {/* The details row */}
           <View style={styles.detailsRow}>
-              <Text style={[styles.brandName, styles.baseText, styles.details]}>Bimbo,</Text> 
-              <Text style={[styles.foodQuantity, styles.baseText, styles.details]}>1</Text>
-              <Text style={[styles.foodUnit, styles.baseText, styles.details]}>Rebanada</Text>
+              <Text style={[styles.baseText, styles.details]}>Bimbo,</Text> 
+              <Text style={[styles.baseText, styles.details]}>1</Text>
+              <Text style={[styles.baseText, styles.details]}>Rebanada</Text>
           </View>
         </View>
         {/* The right column */}
-          <Text style={[styles.foodCalories, styles.baseText]}>77</Text>
+          <Text style={[styles.baseText]}>77</Text>
       </View>
 
       {/*Add Food */}
 
       <View style={[styles.addFoodRow, styles.diaryItem]}>
-        <TouchableOpacity style={styles.leftColumn} onPress={
-        handleAddFood
+        <TouchableOpacity style={styles.leftColumn} onPress={ ()=>
+        router.push('/add-food')
         }>
           <Text style={[styles.baseText,  styles.addFoodText]}>ADD FOOD</Text>  
         </TouchableOpacity>
@@ -175,9 +173,5 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#003135', justifyContent: 'flex-start', paddingTop:100, alignItems: 'center' },
   header: { color: '#00f2ff', letterSpacing: 5, marginBottom: 10 },
   number: { color: '#fff', fontSize: 48, fontWeight: 'bold' },
-  minus: {borderWeight:1, borderColor:'#fff', borderWidth: 5, padding: 20, marginTop: 40, borderRadius: 10},
-  minusButton: {fontWeight:'bold', color: '#00f2ff'},
-  button: { borderWeight: 1, borderColor: '#00f2ff', borderWidth: 1, padding: 20, marginTop: 40 },
-  buttonText: { color: '#00f2ff', fontWeight: 'bold' },
   logo: {width: 250, height: 250, marginBottom: 20, resizeMode: 'contain'}
 });
