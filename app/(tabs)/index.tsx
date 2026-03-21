@@ -1,98 +1,183 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react'; // 1. Import the state "Hook"
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function CalTracker() {
+  // 2. Create a "State" variable. 
+  // 'calories' is the value, 'setCalories' is the function to change it.
+  const [calories, setCalories] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function HomeScreen() {
+  const GOAL = 2500;
+  const exercise = 0;
+  const remaining = GOAL - calories + EXERCISE;
+
+  useEffect(()=>{
+    setTimeout(()=>{
+      setIsLoading(false);
+    }, 3000);
+  }, []);
+
+  const handleAddFood = () =>{
+    setCalories(calories + 100);
+  };
+
+  if(isLoading){
+    return(
+      <View style={styles.loadingContainer}>
+        <Image source={require('../../assets/images/splash-icon.png')}
+        style={styles.logo}/>
+        <Text style={styles.loaderText}>Loading...</Text>
+        <ActivityIndicator size='large' color={"#00f0ff"}/>
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
+      {/* Block 1: Goal */}
+      <View style={styles.dashboardContainer}>
+        <View style={styles.statBlock}>
+          <Text style={styles.statNumber}>{GOAL.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>Goal</Text>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <Text style={styles.symbol}>-</Text>
+        {/* Block 2: Food */}
+        <View style={styles.statBlock}>
+          <Text style={styles.statNumber}>{calories}</Text>
+          <Text style={styles.statLabel}>Food</Text>
+        </View>
+
+        <Text style={styles.symbol}>+</Text>
+        {/* Block 3: Exercise */}
+        <View style={styles.statBlock}>
+          <Text style={styles.statNumber}>{EXERCISE}</Text>
+          <Text style={styles.statLabel}>Exercise</Text>
+        </View>
+
+        <Text style={styles.symbol}>=</Text>
+        {/* Block 4: Remaining */}
+
+        <View style={styles.statBlock}>
+          <Text style={[styles.statNumber, {color: '#02f0ff', fontWeight: 'bold'}]}>{remaining}</Text>
+          <Text style={styles.statLabel}>Remaining</Text>
+        </View>
+      </View>
+     
+
+
+
+      {/* Category */}
+      <View style={styles.diaryItem}>
+        <View style={styles.leftColumn}>
+          <Text style={[styles.baseText,  styles.category]}>Breakfast</Text>  
+        </View>
+          <Text style={[styles.baseText, styles.category]}>907</Text>
+      </View>
+
+
+      <View style={styles.diaryItem}>
+        {/* The left column */}
+        <View style={styles.leftColumn}>
+          <Text style={[styles.foodName, styles.baseText]}>Pan Integral</Text>
+          {/* The details row */}
+          <View style={styles.detailsRow}>
+              <Text style={[styles.brandName, styles.baseText, styles.details]}>Bimbo,</Text> 
+              <Text style={[styles.foodQuantity, styles.baseText, styles.details]}>1</Text>
+              <Text style={[styles.foodUnit, styles.baseText, styles.details]}>Rebanada</Text>
+          </View>
+        </View>
+        {/* The right column */}
+          <Text style={[styles.foodCalories, styles.baseText]}>77</Text>
+      </View>
+
+      {/*Add Food */}
+
+      <View style={[styles.addFoodRow, styles.diaryItem]}>
+        <TouchableOpacity style={styles.leftColumn} onPress={
+        handleAddFood
+        }>
+          <Text style={[styles.baseText,  styles.addFoodText]}>ADD FOOD</Text>  
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={[styles.baseText, styles.addFoodText]}>+</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  addFoodRow: {
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#004042",
+  },
+  addFoodText: {
+    color: '#00f2ff',
+    fontWeight: 'bold',
+  },
+  dashboardContainer: {
     flexDirection: 'row',
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    justifyContent: 'space-around',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 30
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  statBlock: {
+      alignItems: 'center'
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  statNumber: {
+    color: '#fff',
+    fontSize: 18,
   },
+  statLabel:{
+    color: '#aaa',
+    fontSize: 12,
+    marginTop: 4
+  },
+  symbol:{
+    color: '#fff',
+    fontSize: 16,
+    opacity: 0.6,
+    paddingBottom: 20
+  },
+  baseText: {fontSize: 18, color:'#fff'},
+  details:{opacity:0.5},
+  diaryItem: {
+    flexDirection: 'row', 
+    width: '100%',  
+    paddingHorizontal: 20, 
+    paddingVertical: 15,
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#004042',
+ },
+  leftColumn:{
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 2,
+  },
+  detailsRow:{
+    flexDirection: 'row',
+    gap: 4,
+  },
+  category:{
+    fontWeight: 'bold',
+    fontSize: 20
+  },
+
+  loadingContainer: {flex: 1, backgroundColor: '#003135', justifyContent: 'center', alignItems:'center' },
+  loaderText: {color: '#00f0ff', letterSpacing: 5, marginBottom: 20, fontSize: 20, fontWeight: 'bold'},
+  container: { flex: 1, backgroundColor: '#003135', justifyContent: 'flex-start', paddingTop:100, alignItems: 'center' },
+  header: { color: '#00f2ff', letterSpacing: 5, marginBottom: 10 },
+  number: { color: '#fff', fontSize: 48, fontWeight: 'bold' },
+  minus: {borderWeight:1, borderColor:'#fff', borderWidth: 5, padding: 20, marginTop: 40, borderRadius: 10},
+  minusButton: {fontWeight:'bold', color: '#00f2ff'},
+  button: { borderWeight: 1, borderColor: '#00f2ff', borderWidth: 1, padding: 20, marginTop: 40 },
+  buttonText: { color: '#00f2ff', fontWeight: 'bold' },
+  logo: {width: 250, height: 250, marginBottom: 20, resizeMode: 'contain'}
 });
