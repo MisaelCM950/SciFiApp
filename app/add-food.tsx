@@ -1,8 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useFood } from './storage';
 
 export default function AddFoodScreen(){
+    const {addCalories} = useFood();
    const router = useRouter(); 
    const [searchQuery, setSearchQuery] = useState('');
    const FOOD_DATABASE =[
@@ -42,7 +44,15 @@ export default function AddFoodScreen(){
                     <TouchableOpacity 
                     style ={styles.resultItem}
                     key={item.id}
-                    onPress={() => console.log("Selected", item.name)}
+                    onPress={() => {
+                        addCalories({
+                            id:item.id,
+                            name:item.name,
+                            calories: item.calories,
+                            brand: "Generic, "
+                        });
+                        router.back();
+                        }}
                     >
                         <Text style= {styles.resultText}>{item.name}</Text>
                         <Text style = {styles.resultCalories}>{item.calories} Kcal</Text>

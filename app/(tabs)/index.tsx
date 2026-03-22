@@ -1,3 +1,4 @@
+import { useFood } from '@/app/storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react'; // 1. Import the state "Hook"
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -5,13 +6,13 @@ import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } fr
 export default function CalTracker() {
   // 2. Create a "State" variable. 
   // 'calories' is the value, 'setCalories' is the function to change it.
-  const [calories, setCalories] = useState(0);
+  const {totalCalories, meals} = useFood();
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
   const GOAL = 2500;
   const exercise = 0;
-  const remaining = GOAL - calories + exercise;
+  const remaining = 2500 - totalCalories;
 
   useEffect(()=>{
     setTimeout(()=>{
@@ -42,7 +43,7 @@ export default function CalTracker() {
         <Text style={styles.symbol}>-</Text>
         {/* Block 2: Food */}
         <View style={styles.statBlock}>
-          <Text style={styles.statNumber}>{calories}</Text>
+          <Text style={styles.statNumber}>{totalCalories}</Text>
           <Text style={styles.statLabel}>Food</Text>
         </View>
 
@@ -66,28 +67,29 @@ export default function CalTracker() {
 
 
       {/* Category */}
-      <View style={styles.diaryItem}>
+      <View style={[styles.diaryItem,{borderBottomColor: '#004042', borderWidth: 1}]}>
         <View style={styles.leftColumn}>
           <Text style={[styles.baseText,  styles.category]}>Breakfast</Text>  
         </View>
-          <Text style={[styles.baseText, styles.category]}>907</Text>
+          <Text style={[styles.baseText, styles.category]}>{totalCalories}</Text>
       </View>
 
-
-      <View style={styles.diaryItem}>
+    {meals.map((meal,index)=> (
+      <View key={index} style={[styles.diaryItem, {borderTopWidth: 0}]}>
         {/* The left column */}
         <View style={styles.leftColumn}>
-          <Text style={[styles.baseText]}>Pan Integral</Text>
+          <Text style={[styles.baseText]}>{meal.name}</Text>
           {/* The details row */}
           <View style={styles.detailsRow}>
-              <Text style={[styles.baseText, styles.details]}>Bimbo,</Text> 
+              <Text style={[styles.baseText, styles.details]}>{meal.brand}</Text> 
               <Text style={[styles.baseText, styles.details]}>1</Text>
-              <Text style={[styles.baseText, styles.details]}>Rebanada</Text>
+              <Text style={[styles.baseText, styles.details]}>Serving</Text>
           </View>
         </View>
         {/* The right column */}
-          <Text style={[styles.baseText]}>77</Text>
+          <Text style={[styles.baseText]}>{meal.calories}</Text>
       </View>
+      ))}
 
       {/*Add Food */}
 
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
   },
   category:{
     fontWeight: 'bold',
-    fontSize: 20
+    fontSize: 20,
   },
 
   loadingContainer: {flex: 1, backgroundColor: '#003135', justifyContent: 'center', alignItems:'center' },
