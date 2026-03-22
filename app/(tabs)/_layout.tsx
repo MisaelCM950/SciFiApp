@@ -18,7 +18,7 @@ export default function TabLayout() {
         tabBarStyle: {backgroundColor: '#134647'}
       }}>
       <Tabs.Screen
-        name="search"
+        name="home"
         options={{
           title: 'Diary',
           tabBarIcon: ({color}) => <IconSymbol size={28} name="book.pages" color={color} />,
