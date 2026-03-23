@@ -1,4 +1,4 @@
-import { useFood } from '@/app/storage';
+import { useFood } from '@/storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react'; // 1. Import the state "Hook"
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

@@ -1,17 +1,17 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useFood } from './storage';
+import { useFood } from '../storage';
 
 export default function AddFoodScreen(){
     const {addCalories} = useFood();
    const router = useRouter(); 
    const [searchQuery, setSearchQuery] = useState('');
    const FOOD_DATABASE =[
-    {id: '1', name: 'Taco', calories: 200},
-    {id:'2', name: 'Pizza', calories: 285},
-    {id:'3', name: 'Apple', calories: 95},
-    {id:'4', name: 'Burger', calories: 550},
+    {id: '1', name: 'Taco', calories: 200, brand: 'Taco Bell'},
+    {id:'2', name: 'Pizza', calories: 285, brand: 'Domninoes'},
+    {id:'3', name: 'Apple', calories: 95, brand: 'Gala'},
+    {id:'4', name: 'Burger', calories: 550, brand: 'McDonalds'},
    ];
    const filteredFood = FOOD_DATABASE.filter((item) =>{
     const itemName = item.name.toLowerCase();
@@ -45,14 +45,15 @@ export default function AddFoodScreen(){
                     style ={styles.resultItem}
                     key={item.id}
                     onPress={() => {
-                        addCalories({
-                            id:item.id,
-                            name:item.name,
-                            calories: item.calories,
-                            brand: "Generic, "
+                        router.push({
+                            pathname: '/add-food-setting',
+                            params: {
+                                name:item.name,
+                                calories: item.calories,
+                                brand:item.brand
+                            }
                         });
-                        router.back();
-                        }}
+                    }}
                     >
                         <Text style= {styles.resultText}>{item.name}</Text>
                         <Text style = {styles.resultCalories}>{item.calories} Kcal</Text>

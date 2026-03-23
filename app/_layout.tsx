@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
-import { FoodProvider } from './storage';
+import { FoodProvider } from '../storage';
 
 
 export default function RootLayout() {
