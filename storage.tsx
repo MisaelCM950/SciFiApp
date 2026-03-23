@@ -5,6 +5,7 @@ interface Meal{
     name: string;
     calories: number;
     brand?: string;
+    mealType: string;
 }
 
 interface FoodContextType{
