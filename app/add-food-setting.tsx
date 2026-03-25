@@ -5,11 +5,12 @@ import { useFood } from '../storage';
 
 export default function AddFoodSettingScreen(){
 
+const {name, calories, brand, selectedCategory} = useLocalSearchParams();
     const [unit, setUnit] = useState('g');
     const [quantity, setQuantity] = useState('1');
-    const [mealType, setMealType] = useState('Breakfast');
+    const [mealType, setMealType] = useState(selectedCategory ||'Breakfast');
 
-   const {name, calories, brand} = useLocalSearchParams();
+   
 
     const {addCalories} = useFood();
    const router = useRouter(); 
@@ -22,7 +23,7 @@ export default function AddFoodSettingScreen(){
             name: name as string,
             calories: calculatedCalories,
             brand: brand as string,
-            mealType: mealType,
+            mealType: mealType as string,
         });
         router.dismissAll();
     }   

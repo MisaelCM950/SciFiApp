@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { FoodProvider } from '../storage';
 
@@ -6,6 +7,7 @@ import { FoodProvider } from '../storage';
 export default function RootLayout() {
 
   return (
+    <GestureHandlerRootView style={{flex: 1}}>
     <FoodProvider>
       <Stack screenOptions={{headerShown: false}}>
         <Stack.Screen name = "(tabs)" />
@@ -18,5 +20,6 @@ export default function RootLayout() {
         />
       </Stack>
     </FoodProvider>
+    </GestureHandlerRootView>
   );
 }

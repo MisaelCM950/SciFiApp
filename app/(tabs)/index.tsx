@@ -1,18 +1,28 @@
 import { useFood } from '@/storage';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react'; // 1. Import the state "Hook"
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 export default function CalTracker() {
   // 2. Create a "State" variable. 
   // 'calories' is the value, 'setCalories' is the function to change it.
-  const {totalCalories, meals} = useFood();
+  const {totalCalories, meals, deleteMeal} = useFood();
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
   const GOAL = 2500;
   const exercise = 0;
   const remaining = 2500 - totalCalories;
+
+  const renderRightActions = () => {//
+    return (
+    <View style={styles.deleteBackground}>
+      <Text style={styles.deleteText}>DELETE</Text>
+    </View>
+    );
+};
 
   useEffect(()=>{
     setTimeout(()=>{
@@ -32,6 +42,7 @@ export default function CalTracker() {
   }
 
   return (
+  <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.mainWrapper} simultaneousHandlers={[]} waitFor ={[]}>
     <View style={styles.container}>
       {/* Block 1: Goal */}
       <View style={styles.dashboardContainer}>
@@ -66,22 +77,93 @@ export default function CalTracker() {
 
 
 
-      {/* Category */}
-      <View style={[styles.diaryItem,{borderBottomColor: '#004042', borderWidth: 1}]}>
+      {/* 1. Breakfast */}
+      <View style={[styles.diaryItem,{borderBottomColor: '#004042', borderBottomWidth: 1}]}>
         <View style={styles.leftColumn}>
           <Text style={[styles.baseText,  styles.category]}>Breakfast</Text>  
         </View>
-          <Text style={[styles.baseText, styles.category]}>{totalCalories}</Text>
+          <Text style={[styles.baseText, styles.category]}>
+            {meals.filter(m => m.mealType === 'Breakfast').reduce((sum, m) => sum + m.calories, 0)}
+          </Text>
+      </View>
+    {meals
+  .filter((meal) => meal.mealType === 'Breakfast')
+  .map((meal) => (
+    <Swipeable 
+      key={meal.id} 
+      friction={1}
+      rightThreshold={60}
+      renderRightActions={renderRightActions} 
+      containerStyle={{ flex: 1, backgroundColor: '#003135' }} 
+      activeOpacity={0.6}
+      onSwipeableWillOpen={() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      deleteMeal(meal.id);
+  }}
+    >
+      <View style={[styles.diaryItem, { borderTopWidth: 0, backgroundColor: '#003135' }]}>
+        <View style={styles.leftColumn}>
+          <Text style={styles.baseText}>{meal.name}</Text>
+          <View style={styles.detailsRow}>
+              <Text style={[styles.baseText, styles.details]}>{meal.brand || 'Generic'}</Text> 
+              <Text style={[styles.baseText, styles.details]}>1 Serving</Text>
+          </View>
+        </View>
+        <Text style={styles.baseText}>{meal.calories}</Text>
+      </View>
+    </Swipeable>
+  ))
+}
+
+      {/*Add Food */}
+
+      <View style={[styles.addFoodRow, styles.diaryItem]}>
+        <TouchableOpacity style={styles.leftColumn} onPress={ ()=>
+        router.push({
+          pathname: '/add-food',
+          params: {selectedCategory: 'Breakfast'}
+        })
+        }>
+          <Text style={[styles.baseText,  styles.addFoodText]}>ADD FOOD</Text>  
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={[styles.baseText, styles.addFoodText]}>+</Text>
+        </TouchableOpacity>
       </View>
 
-    {meals.map((meal,index)=> (
-      <View key={index} style={[styles.diaryItem, {borderTopWidth: 0}]}>
+      { /*2. Lunch*/}
+      <View style={[styles.diaryItem,{borderBottomColor: '#004042', borderBottomWidth: 1}]}>
+        <View style={styles.leftColumn}>
+          <Text style={[styles.baseText,  styles.category]}>Lunch</Text>  
+        </View>
+          <Text style={[styles.baseText, styles.category]}>
+            {meals.filter(m => m.mealType === "Lunch").reduce((sum, m) => sum + m.calories, 0)}
+          </Text>
+      </View>
+
+    {meals  
+    .filter((meal) => meal.mealType === 'Lunch')
+    .map((meal, index) => (
+      <Swipeable 
+        key={meal.id}
+        friction={1}
+        rightThreshold={60}
+        renderRightActions={renderRightActions}
+        containerStyle={{flex: 1, backgroundColor: '#003135'}}
+        activeOpacity={0.6}
+        onSwipeableWillOpen={ () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          deleteMeal(meal.id);
+          }
+        }
+      >
+       <View style={[styles.diaryItem, {borderTopWidth: 0, backgroundColor: "#003135"} ]}>
         {/* The left column */}
         <View style={styles.leftColumn}>
           <Text style={[styles.baseText]}>{meal.name}</Text>
           {/* The details row */}
           <View style={styles.detailsRow}>
-              <Text style={[styles.baseText, styles.details]}>{meal.brand}</Text> 
+              <Text style={[styles.baseText, styles.details]}>{meal.brand || 'Generic'}</Text> 
               <Text style={[styles.baseText, styles.details]}>1</Text>
               <Text style={[styles.baseText, styles.details]}>Serving</Text>
           </View>
@@ -89,13 +171,78 @@ export default function CalTracker() {
         {/* The right column */}
           <Text style={[styles.baseText]}>{meal.calories}</Text>
       </View>
-      ))}
+      </Swipeable>
+    ))
+    }
 
       {/*Add Food */}
 
       <View style={[styles.addFoodRow, styles.diaryItem]}>
         <TouchableOpacity style={styles.leftColumn} onPress={ ()=>
-        router.push('/add-food')
+        router.push({
+          pathname: '/add-food',
+          params: {selectedCategory: 'Lunch'}
+        })
+        }>
+          <Text style={[styles.baseText,  styles.addFoodText]}>ADD FOOD</Text>  
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={[styles.baseText, styles.addFoodText]}>+</Text>
+        </TouchableOpacity>
+      </View>
+
+      { /*3. Dinner*/}
+      <View style={[styles.diaryItem,{borderBottomColor: '#004042', borderBottomWidth: 1}]}>
+        <View style={styles.leftColumn}>
+          <Text style={[styles.baseText,  styles.category]}>Dinner</Text>  
+        </View>
+          <Text style={[styles.baseText, styles.category]}>
+            {meals.filter(m => m.mealType === 'Dinner').reduce((sum, m)=> sum + m.calories, 0)}
+          </Text>
+      </View>
+
+    {meals.
+      filter((meal)=> meal.mealType === 'Dinner')
+      .map((meal, index) =>(
+        <Swipeable 
+          key={meal.id}
+          friction={1}
+          rightThreshold={60}
+          containerStyle={{flex: 1, backgroundColor: '#003135'}}
+          renderRightActions={renderRightActions}
+          activeOpacity= {0.6}
+          onSwipeableWillOpen={()=>{
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            deleteMeal(meal.id);
+          }}
+        >
+        <View style={[styles.diaryItem, {borderTopWidth: 0, backgroundColor: '#003135'}]}>
+        {/* The left column */}
+        <View style={styles.leftColumn}>
+          <Text style={[styles.baseText]}>{meal.name}</Text>
+          {/* The details row */}
+          <View style={styles.detailsRow}>
+              <Text style={[styles.baseText, styles.details]}>{meal.brand || 'Generic'}</Text> 
+              <Text style={[styles.baseText, styles.details]}>1</Text>
+              <Text style={[styles.baseText, styles.details]}>Serving</Text>
+          </View>
+        </View>
+        {/* The right column */}
+          <Text style={[styles.baseText]}>{meal.calories}</Text>
+      </View>
+      </Swipeable>
+      ))
+      }
+      
+
+      {/*Add Food */}
+
+      <View style={[styles.addFoodRow, styles.diaryItem]}>
+        <TouchableOpacity style={styles.leftColumn} onPress={ ()=>
+        router.push({
+          pathname: '/add-food',
+          params: {selectedCategory: 'Dinner'}
+        })
         }>
           <Text style={[styles.baseText,  styles.addFoodText]}>ADD FOOD</Text>  
         </TouchableOpacity>
@@ -104,10 +251,34 @@ export default function CalTracker() {
         </TouchableOpacity>
       </View>
     </View>
+  </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  root:{
+    flex:1
+  },
+ deleteBackground: {
+  backgroundColor: '#ff4444',
+  justifyContent: 'center',
+  alignItems: 'flex-end',
+  paddingRight: 30,
+  height: '100%', 
+  width: '100%'
+},
+deleteText: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+  mainWrapper:{
+    flex:1,
+    backgroundColor: '#003135',
+  },
+  scrollContainer:{
+    paddingBottom: 50
+  },
   addFoodRow: {
     borderTopWidth: 1,
     borderBottomWidth: 1,

@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useFood } from '../storage';
@@ -6,6 +6,7 @@ import { useFood } from '../storage';
 export default function AddFoodScreen(){
     const {addCalories} = useFood();
    const router = useRouter(); 
+   const {selectedCategory} = useLocalSearchParams();
    const [searchQuery, setSearchQuery] = useState('');
    const FOOD_DATABASE =[
     {id: '1', name: 'Taco', calories: 200, brand: 'Taco Bell'},
@@ -50,7 +51,8 @@ export default function AddFoodScreen(){
                             params: {
                                 name:item.name,
                                 calories: item.calories,
-                                brand:item.brand
+                                brand:item.brand,
+                                selectedCategory: selectedCategory,
                             }
                         });
                     }}
