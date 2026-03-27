@@ -1,3 +1,4 @@
+import { Macrobar } from '@/components/barchart';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -82,6 +83,16 @@ const {name, calories, brand, selectedCategory} = useLocalSearchParams();
                         </TouchableOpacity>
                     ))}
                 </View>
+                         
+                <View style={styles.macrosContainer}>
+
+                    <Text style={styles.sectionTitle}>Macros</Text>
+                    <View style={styles.chartArea}>
+                        <Macrobar label="Carbs" grams={45} percentage={50} color="#00f2ff"/>
+                        <Macrobar label="Fat" grams={20} percentage={25} color="#ff4444"/>
+                        <Macrobar label="Protein" grams={25} percentage={25} color="#00ff44"/>
+                    </View>
+                </View>
             </View>
             <Text style={styles.baseText}>{calculatedCalories} Kcal</Text>
             
@@ -97,6 +108,20 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight:'bold'
+    },
+    sectionTitle:{
+        color: '#fff',
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 15,
+    },
+    macrosContainer:{
+        width: '100%',
+        marginBottom: 20
+    },
+    chartArea: {
+        width: '100%',
+        gap: 15
     },
     formContainer:{
         width: '90%'

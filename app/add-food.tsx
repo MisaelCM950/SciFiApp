@@ -1,19 +1,14 @@
+import FoodResultItem from '@/components/FoodResultItem';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useFood } from '../storage';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FOOD_DATABASE } from '../constants/Food-data';
 
 export default function AddFoodScreen(){
-    const {addCalories} = useFood();
    const router = useRouter(); 
    const {selectedCategory} = useLocalSearchParams();
    const [searchQuery, setSearchQuery] = useState('');
-   const FOOD_DATABASE =[
-    {id: '1', name: 'Taco', calories: 200, brand: 'Taco Bell'},
-    {id:'2', name: 'Pizza', calories: 285, brand: 'Domninoes'},
-    {id:'3', name: 'Apple', calories: 95, brand: 'Gala'},
-    {id:'4', name: 'Burger', calories: 550, brand: 'McDonalds'},
-   ];
+   
    const filteredFood = FOOD_DATABASE.filter((item) =>{
     const itemName = item.name.toLowerCase();
     const userTyped = searchQuery.toLowerCase();
@@ -22,13 +17,17 @@ export default function AddFoodScreen(){
    });
    
     return(
+ 
         <View style={styles.container}>
+                   {/*Back Button*/}
             <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.backButton}onPress={()=> router.back()}>
                 <Text style={styles.backText}>Back</Text>
             </TouchableOpacity>
         </View>
-            <Text style={styles.title}>Search</Text>
+                    {/*Header*/}
+            <Text style={styles.title}>Add Food</Text>
+                {/*Search Input*/}
             <View style={styles.inputContainer}>
                 <TextInput style={styles.searchInput} 
                 placeholder='Add Food' 
@@ -39,30 +38,24 @@ export default function AddFoodScreen(){
                 />
                 <View style={styles.glowLine}/>
             </View>
+
             <Text style={styles.debugText}>SEARCHING FOR: {searchQuery.toUpperCase()}</Text>
-            <View style={styles.resultsContainer}>
+
+            <ScrollView style={styles.resultsContainer}>
                 {filteredFood.map((item) =>(
-                    <TouchableOpacity 
-                    style ={styles.resultItem}
+                    <FoodResultItem
                     key={item.id}
+                    item={item}
                     onPress={() => {
                         router.push({
                             pathname: '/add-food-setting',
                             params: {
-                                name:item.name,
-                                calories: item.calories,
-                                brand:item.brand,
-                                selectedCategory: selectedCategory,
+                                ...item, selectedCategory
                             }
                         });
-                    }}
-                    >
-                        <Text style= {styles.resultText}>{item.name}</Text>
-                        <Text style = {styles.resultCalories}>{item.calories} Kcal</Text>
-                    </TouchableOpacity>
+                    }}/>
                 ))}
-                <Text></Text>
-            </View>
+            </ScrollView>
         </View>
 
     

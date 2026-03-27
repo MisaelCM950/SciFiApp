@@ -33,7 +33,7 @@ export default function CalTracker() {
   }
 
   return (
-  <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.mainWrapper} simultaneousHandlers={[]} waitFor ={[]}>
+  <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.mainWrapper}>
     <View style={styles.container}>
       {/* Block 1: Goal */}
       <View style={styles.dashboardContainer}>
