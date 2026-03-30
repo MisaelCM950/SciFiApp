@@ -1,9 +1,13 @@
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { THEME } from '../constants/theme';
 
+
+
 export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:string) => void}) {
+  const router = useRouter();
   const renderRightActions = () => (
     <View style={styles.deleteBackground}>
       <Text style={styles.deleteText}>DELETE</Text>
@@ -20,16 +24,22 @@ export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:str
       onDelete(meal.id);
   }}
     >
-      <View style={[styles.diaryItem, { borderTopWidth: 0, backgroundColor: '#003135' }]}>
+      <Pressable 
+      style={[styles.diaryItem, { borderTopWidth: 0, backgroundColor: THEME.color.background}]}
+      onPress={ () => router.push({
+        pathname: '/add-food-setting',
+        params: {...meal, selectedCategory: meal.mealType, isEditing: 'true'}
+      })}
+      >
         <View style={styles.leftColumn}>
           <Text style={styles.baseText}>{meal.name}</Text>
           <View style={styles.detailsRow}>
               <Text style={[styles.baseText, styles.details]}>{meal.brand || 'Generic'}</Text> 
-              <Text style={[styles.baseText, styles.details]}>1 Serving</Text>
+              <Text style={[styles.baseText, styles.details]}>{meal.quantity || 1} Serving</Text>
           </View>
         </View>
         <Text style={styles.baseText}>{meal.calories}</Text>
-      </View>
+      </Pressable>
     </Swipeable>
     );
     };

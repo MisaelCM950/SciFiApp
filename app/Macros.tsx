@@ -21,12 +21,12 @@ export default function AddFoodScreen(){
         <View style={styles.container}>
                    {/*Back Button*/}
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.backButton}onPress={()=> router.back()}>
-                    <Text style={styles.backText}>Back</Text>
-                </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.backButton}onPress={()=> router.back()}>
+                <Text style={styles.backText}>Back</Text>
+            </TouchableOpacity>
+        </View>
                     {/*Header*/}
-            <Text style={styles.title}>Add Food</Text>
+            <Text style={styles.title}>Hello</Text>
                 {/*Search Input*/}
             <View style={styles.inputContainer}>
                 <TextInput style={styles.searchInput} 
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#004042'
     },
-    container: {flex: 1, backgroundColor: '#001a1c', alignItems: 'center', paddingTop: 5},
+    container: {flex: 1, backgroundColor: '#001a1c', alignItems: 'center', paddingTop: 100},
     title:{color: '#fff', fontSize:24, fontWeight: 'bold', letterSpacing: 2, marginBottom: 40},
     backButton:{borderColor: "#00f2ff", borderWidth: 1, padding: 15, borderStyle: 'dashed'},
     searchInput:{height:50, color: '#00f2ff', fontSize: 20, paddingHorizontal: 10},

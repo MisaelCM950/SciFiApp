@@ -3,6 +3,11 @@ import React, { createContext, useContext, useState } from 'react';
 interface Meal{
     id: string;
     name: string;
+    baseCalories: number;
+    carbs: number;
+    fat: number;
+    protein: number;
+    quantity: number;
     calories: number;
     brand?: string;
     mealType: string;
@@ -13,29 +18,39 @@ interface FoodContextType{
     meals: Meal[];
     addCalories: (food: Meal) => void;
     deleteMeal: (id: string) => void;
+    updateMeal: (food: Meal) => void;
 }
 
 const FoodContext = createContext <FoodContextType | undefined> (undefined);
 
 export function FoodProvider({children}: {children: React.ReactNode}) {
-    const [totalCalories, setTotalCalories] = useState(0);
     const [meals, setMeals] = useState<Meal[]>([]);
+
+    
+    const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
 
     const deleteMeal = (id: string)=> {
         const mealToDelete = meals.find(m => m.id === id);
         if(mealToDelete){
-            setTotalCalories((prev) => prev - mealToDelete.calories);
+
             setMeals((prevMeals)=> prevMeals.filter((meal) => meal.id !== id));
         }
     };
-
+//
     const addCalories = (food: Meal) => {
-        setTotalCalories((prev) => prev + food.calories);
         setMeals((prevMeals) => [...prevMeals, food])
     };
 
+
+    const updateMeal = (updatedFood: Meal) => {
+        const oldMeal = meals.find(m => m.id === updatedFood.id);
+        if (oldMeal) {
+            setMeals((prevMeals) => prevMeals.map(meal => meal.id === updatedFood.id ? updatedFood: meal ));
+        }
+    };
+
     return(
-        <FoodContext.Provider value = {{totalCalories, meals, addCalories, deleteMeal}}>
+        <FoodContext.Provider value = {{totalCalories, meals, addCalories, deleteMeal, updateMeal}}>
             {children}
         </FoodContext.Provider>
     );

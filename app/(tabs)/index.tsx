@@ -1,7 +1,7 @@
 import { useFood } from '@/storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MealSection from '../../components/MealSection';
 import { THEME } from '../../constants/theme';
 
@@ -35,8 +35,18 @@ export default function CalTracker() {
   return (
   <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.mainWrapper}>
     <View style={styles.container}>
+
+        <Text>Today</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>Progress</Text>
+        </View>
+
       {/* Block 1: Goal */}
-      <View style={styles.dashboardContainer}>
+      <Pressable style={styles.dashboardContainer} onPress={ () =>
+        router.push({
+          pathname: '/Macros'
+        })
+      }>
         <View style={styles.statBlock}>
           <Text style={styles.statNumber}>{GOAL.toLocaleString()}</Text>
           <Text style={styles.statLabel}>Goal</Text>
@@ -63,7 +73,7 @@ export default function CalTracker() {
           <Text style={[styles.statNumber, {color: '#02f0ff', fontWeight: 'bold'}]}>{remaining}</Text>
           <Text style={styles.statLabel}>Remaining</Text>
         </View>
-      </View>
+      </Pressable>
      
 
 
@@ -106,6 +116,12 @@ const styles = StyleSheet.create({
     flex:1,
     backgroundColor: THEME.color.background,
   },
+  title: {
+    color: THEME.color.accent, 
+    fontWeight: 'bold', 
+    fontSize: 17, 
+  },
+
   scrollContainer:{
     paddingBottom: 50
   },
@@ -136,10 +152,15 @@ const styles = StyleSheet.create({
     opacity: 0.6,
     paddingBottom: 20
   },
+  headerContainer: {
+    width: '100%',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 20
+  },
   loadingContainer: {flex: 1, backgroundColor: THEME.color.background , justifyContent: 'center', alignItems:'center' },
   loaderText: {color: '#00f0ff', letterSpacing: 5, marginBottom: 20, fontSize: 20, fontWeight: 'bold'},
   container: { flex: 1, backgroundColor: THEME.color.background, justifyContent: 'flex-start', paddingTop:100, alignItems: 'center' },
-  header: { color: THEME.color.accent, letterSpacing: 5, marginBottom: 10 },
   number: { color: '#fff', fontSize: 48, fontWeight: 'bold' },
   logo: {width: 250, height: 250, marginBottom: 20, resizeMode: 'contain'}
 });

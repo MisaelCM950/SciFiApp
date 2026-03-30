@@ -5,27 +5,49 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { useFood } from '../storage';
 
 export default function AddFoodSettingScreen(){
-
-const {name, calories, brand, selectedCategory} = useLocalSearchParams();
+// Receive properties
+const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: savedQuantity, selectedCategory, isEditing} = useLocalSearchParams();
     const [unit, setUnit] = useState('g');
-    const [quantity, setQuantity] = useState('1');
+    const [quantity, setQuantity] = useState(savedQuantity ? String(savedQuantity): '1');
     const [mealType, setMealType] = useState(selectedCategory ||'Breakfast');
 
    
 
-    const {addCalories} = useFood();
+    const {addCalories, updateMeal} = useFood();
    const router = useRouter(); 
+// Convert strings to numbers
+    const c = Number(carbs) * Number(quantity || 0);
+    const f = Number(fat) * Number(quantity || 0);
+    const p = Number(protein) * Number(quantity || 0);
+    const baseCal = Number(baseCalories) || Number(calories) || 0;
+    const calculatedCalories = baseCal * Number(quantity) || 0;
 
-    const calculatedCalories = Number(calories) * Number(quantity || 0);
+    const totalMacros = c + f + p;
+
+// Prevent diving by 0 if a food has 0 macros (like water)
+    const carbsPct = totalMacros > 0 ? (c/totalMacros) * 100 : 0;
+    const fatPct = totalMacros > 0 ? (f/totalMacros) * 100 : 0
+    const proteinPct = totalMacros > 0 ? (p/totalMacros) * 100: 0
 
     const handleAdd = () => {
-        addCalories({
-            id:Date.now().toString(),
+
+        const mealData = {
+            id: isEditing === 'true' ? (id as string) : Date.now().toString(),
             name: name as string,
+            baseCalories: baseCal,
+            carbs: Number(carbs),
+            fat: Number(fat),
+            protein: Number(protein),
+            quantity: Number(quantity),
             calories: calculatedCalories,
             brand: brand as string,
             mealType: mealType as string,
-        });
+        };
+        if(isEditing === 'true') {
+            updateMeal(mealData);
+        } else{
+            addCalories(mealData);
+        }
         router.dismissAll();
     }   
 
@@ -38,7 +60,7 @@ const {name, calories, brand, selectedCategory} = useLocalSearchParams();
                 </TouchableOpacity>
                 
                 <TouchableOpacity style={styles.buttonStyle}  onPress={handleAdd}>
-                    <Text style= {styles.backText}>Add</Text>
+                    <Text style= {styles.backText}>{isEditing === 'true' ? 'Update' : 'Add'}</Text>
                 </TouchableOpacity>
             </View>
             
@@ -65,6 +87,7 @@ const {name, calories, brand, selectedCategory} = useLocalSearchParams();
                             placeholderTextColor= '#00f2ff'
                             value={quantity}
                             onChangeText ={setQuantity}
+                            selectTextOnFocus ={true}
                             />
                             <View style={styles.glowLine}/>
                         </View>
@@ -88,9 +111,9 @@ const {name, calories, brand, selectedCategory} = useLocalSearchParams();
 
                     <Text style={styles.sectionTitle}>Macros</Text>
                     <View style={styles.chartArea}>
-                        <Macrobar label="Carbs" grams={45} percentage={50} color="#00f2ff"/>
-                        <Macrobar label="Fat" grams={20} percentage={25} color="#ff4444"/>
-                        <Macrobar label="Protein" grams={25} percentage={25} color="#00ff44"/>
+                        <Macrobar label="Carbs" grams={c} percentage={carbsPct} color="#00f2ff"/>
+                        <Macrobar label="Fat" grams={f} percentage={fatPct} color="#ff4444"/>
+                        <Macrobar label="Protein" grams={p} percentage={proteinPct} color="#00ff44"/>
                     </View>
                 </View>
             </View>
