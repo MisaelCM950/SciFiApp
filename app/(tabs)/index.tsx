@@ -5,6 +5,7 @@ import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View
 import MealSection from '../../components/MealSection';
 import { THEME } from '../../constants/theme';
 
+
 export default function CalTracker() {
   const {totalCalories, meals, deleteMeal} = useFood();
   const [isLoading, setIsLoading] = useState(true);
@@ -45,6 +46,7 @@ export default function CalTracker() {
       <Pressable style={styles.dashboardContainer} onPress={ () =>
         router.push({
           pathname: '/Macros'
+          
         })
       }>
         <View style={styles.statBlock}>
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {flex: 1, backgroundColor: THEME.color.background , justifyContent: 'center', alignItems:'center' },
   loaderText: {color: '#00f0ff', letterSpacing: 5, marginBottom: 20, fontSize: 20, fontWeight: 'bold'},
-  container: { flex: 1, backgroundColor: THEME.color.background, justifyContent: 'flex-start', paddingTop:100, alignItems: 'center' },
+  container: { flex: 1, backgroundColor: THEME.color.background, justifyContent: 'flex-start', paddingTop: 70, alignItems: 'center' },
   number: { color: '#fff', fontSize: 48, fontWeight: 'bold' },
   logo: {width: 250, height: 250, marginBottom: 20, resizeMode: 'contain'}
 });

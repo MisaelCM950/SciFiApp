@@ -47,6 +47,6 @@ const styles = StyleSheet.create({
         backgroundColor: THEME.color.border,
         borderRadius: 5,
         marginHorizontal:10,
-        overflow: 'hidden'
+        overflow: 'hidden',
     }
 })
