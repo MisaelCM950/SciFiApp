@@ -1,19 +1,42 @@
 import { useFood } from '@/storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MealSection from '../../components/MealSection';
 import { THEME } from '../../constants/theme';
 
 
 export default function CalTracker() {
-  const {totalCalories, meals, deleteMeal} = useFood();
+  const {totalCalories, meals, deleteMeal, selectedDate, setSelectedDate} = useFood();
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
   const GOAL = 2500;
   const exercise = 0;
   const remaining = 2500 - totalCalories;
+
+  const getDisplayDate = () => {
+    const today = new Date().toISOString().split('T')[0];
+    if(selectedDate === today) return "Today";
+    
+    const [year, month, day] = selectedDate.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    return dateObj.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+    }
+
+  const changeDate = (direction: 'prev'| 'next') => {
+    const [year, month, day] = selectedDate.split('-').map(Number);
+    const newDate  = new Date(year, month - 1, day);
+
+    if(direction === 'prev') newDate.setDate(newDate.getDate() - 1);
+    if(direction === 'next') newDate.setDate(newDate.getDate() + 1);
+
+    const y = newDate.getFullYear();
+    const m = String(newDate.getMonth() + 1).padStart(2, '0');
+    const d = String(newDate.getDate()).padStart(2, '0');
+
+    setSelectedDate(`${y}-${m}-${d}`);
+  };
 
 
   useEffect(()=>{
@@ -37,7 +60,16 @@ export default function CalTracker() {
   <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.mainWrapper}>
     <View style={styles.container}>
 
-        <Text>Today</Text>
+        <View style={styles.dateHeader}>
+          <TouchableOpacity onPress={() => changeDate('prev')} style={styles.arrowButton}>
+            <Text style={styles.arrowText}>{"<"}</Text>
+          </TouchableOpacity>
+          <Text style={styles.dateText}>{getDisplayDate()}</Text>
+          
+          <TouchableOpacity onPress={() => changeDate('next')} style ={styles.arrowButton}>
+            <Text style = {styles.arrowText}>{">"}</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.headerContainer}>
           <Text style={styles.title}>Progress</Text>
         </View>
@@ -111,6 +143,29 @@ export default function CalTracker() {
 }
 
 const styles = StyleSheet.create({
+  dateText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold'
+  },
+  dateHeader:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 20
+  },
+  arrowText: {
+    color: '#00f2ff',
+    fontSize: 20,
+    fontWeight: 'bold'
+  },
+  arrowButton: {
+    padding: 10,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 10,
+  },
   root:{
     flex:1
   },

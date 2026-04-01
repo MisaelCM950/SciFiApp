@@ -11,11 +11,14 @@ interface Meal{
     calories: number;
     brand?: string;
     mealType: string;
+    date: string;
 }
 
 interface FoodContextType{
     totalCalories: number;
     meals: Meal[];
+    selectedDate: string;
+    setSelectedDate: (date: string) => void;
     addCalories: (food: Meal) => void;
     deleteMeal: (id: string) => void;
     updateMeal: (food: Meal) => void;
@@ -24,33 +27,28 @@ interface FoodContextType{
 const FoodContext = createContext <FoodContextType | undefined> (undefined);
 
 export function FoodProvider({children}: {children: React.ReactNode}) {
-    const [meals, setMeals] = useState<Meal[]>([]);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+    const [allMeals, setAllMeals] = useState<Meal[]>([]);
 
+    const filteredMeals = allMeals.filter(meal => meal.date === selectedDate);
     
-    const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
+    const totalCalories = filteredMeals.reduce((sum, meal) => sum + meal.calories, 0);
 
     const deleteMeal = (id: string)=> {
-        const mealToDelete = meals.find(m => m.id === id);
-        if(mealToDelete){
-
-            setMeals((prevMeals)=> prevMeals.filter((meal) => meal.id !== id));
-        }
+            setAllMeals((prevMeals)=> prevMeals.filter((meal) => meal.id !== id));
     };
 //
     const addCalories = (food: Meal) => {
-        setMeals((prevMeals) => [...prevMeals, food])
+        setAllMeals((prevMeals) => [...prevMeals, food])
     };
 
 
     const updateMeal = (updatedFood: Meal) => {
-        const oldMeal = meals.find(m => m.id === updatedFood.id);
-        if (oldMeal) {
-            setMeals((prevMeals) => prevMeals.map(meal => meal.id === updatedFood.id ? updatedFood: meal ));
-        }
+            setAllMeals((prevMeals) => prevMeals.map(meal => meal.id === updatedFood.id ? updatedFood: meal ));
     };
 
     return(
-        <FoodContext.Provider value = {{totalCalories, meals, addCalories, deleteMeal, updateMeal}}>
+        <FoodContext.Provider value = {{totalCalories, meals: filteredMeals, addCalories, deleteMeal, updateMeal, setSelectedDate, selectedDate}}>
             {children}
         </FoodContext.Provider>
     );

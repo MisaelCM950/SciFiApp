@@ -13,7 +13,7 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
 
    
 
-    const {addCalories, updateMeal} = useFood();
+    const {addCalories, updateMeal, selectedDate} = useFood();
    const router = useRouter(); 
 // Convert strings to numbers
     const c = Number(carbs) * Number(quantity || 0);
@@ -42,6 +42,7 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
             calories: calculatedCalories,
             brand: brand as string,
             mealType: mealType as string,
+            date: selectedDate
         };
         if(isEditing === 'true') {
             updateMeal(mealData);
