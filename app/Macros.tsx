@@ -71,7 +71,7 @@ export default function MacroScreen(){
                 {/* Carbs */}
                 <MacroContainer
                     label= 'Carbs'
-                    totalMacro={totalCarbs}
+                    totalMacro={Math.round(totalCarbs)}
                     totalGoal={CARB_GOAL}
                     goalLeft={carbsLeft}
                     color='#00f2ff'
@@ -79,7 +79,7 @@ export default function MacroScreen(){
                 
                 <MacroContainer
                     label= 'Protein'
-                    totalMacro={totalProtein}
+                    totalMacro={Math.round(totalProtein)}
                     totalGoal={PROTEIN_GOAL}
                     goalLeft={proteinLeft}
                     color='#00ff44'
@@ -87,7 +87,7 @@ export default function MacroScreen(){
 
                 <MacroContainer
                     label= 'Fat'
-                    totalMacro={totalFat}
+                    totalMacro={Math.round(totalFat)}
                     totalGoal={FAT_GOAL}
                     goalLeft={fatLeft}
                     color='#ff4444'

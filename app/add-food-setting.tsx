@@ -112,9 +112,9 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
 
                     <Text style={styles.sectionTitle}>Macros</Text>
                     <View style={styles.chartArea}>
-                        <Macrobar label="Carbs" grams={c} percentage={carbsPct} color="#00f2ff"/>
-                        <Macrobar label="Fat" grams={f} percentage={fatPct} color="#ff4444"/>
-                        <Macrobar label="Protein" grams={p} percentage={proteinPct} color="#00ff44"/>
+                        <Macrobar label="Carbs" grams={Math.round(c)} percentage={carbsPct} color="#00f2ff"/>
+                        <Macrobar label="Fat" grams={Math.round(f)} percentage={fatPct} color="#ff4444"/>
+                        <Macrobar label="Protein" grams={Math.round(p)} percentage={proteinPct} color="#00ff44"/>
                     </View>
                 </View>
             </View>

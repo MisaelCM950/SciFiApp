@@ -1,4 +1,5 @@
 import FoodResultItem from '@/components/FoodResultItem';
+import { THEME } from '@/constants/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -22,7 +23,7 @@ export default function AddFoodScreen(){
                    {/*Back Button*/}
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.backButton}onPress={()=> router.back()}>
-                    <Text style={styles.backText}>Back</Text>
+                    <Text style={styles.buttonText}>Back</Text>
                 </TouchableOpacity>
             </View>
                     {/*Header*/}
@@ -54,12 +55,30 @@ export default function AddFoodScreen(){
                         });
                     }}/>
                 ))}
+                <View style={{alignItems: 'center'}}>
+                    <TouchableOpacity style={styles.customFood} onPress={
+                        () => router.push({
+                            pathname: '/custom-food',
+                            params: {selectedCategory}
+                        })
+                        }>
+                        <Text style={[styles.buttonText, {fontSize: 15}]}>Custom Food?</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
+            
         </View>
 
     
 )};
 const styles = StyleSheet.create({
+    customFood: {
+        marginTop: 30,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        padding: 15,
+        borderColor: THEME.color.accent
+    },
     resultText:{
         color: '#fff',
         fontSize: 18,
@@ -86,10 +105,10 @@ const styles = StyleSheet.create({
     backButton:{borderColor: "#00f2ff", borderWidth: 1, padding: 15, borderStyle: 'dashed'},
     searchInput:{height:50, color: '#00f2ff', fontSize: 20, paddingHorizontal: 10},
     debugText: {color:'#005d61', fontSize: 12, marginTop: 10},
-    backText: {color: '#00f2ff', fontWeight: 'bold'},
+    buttonText: {color: '#00f2ff', fontWeight: 'bold'},
     resultsContainer:{
         width: '100%',
-        marginTop: 20
+        marginTop: 20,
     },
     glowLine:{backgroundColor: '#00f2ff', height: 2, shadowColor: "#00f2ff", shadowRadius: 10, shadowOpacity: 1, elevation: 5},
 });
