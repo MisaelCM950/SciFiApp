@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface Meal{
     id: string;
@@ -18,6 +19,14 @@ interface FoodContextType{
     totalCalories: number;
     meals: Meal[];
     selectedDate: string;
+    calorieGoal: string;
+    carbGoal: string;
+    fatGoal: string;
+    proteinGoal: string;
+    setCalorieGoal: (val: string) => void;
+    setCarbGoal:(val: string) => void;
+    setFatGoal:(val: string) => void;
+    setProteinGoal:(val: string) => void;
     setSelectedDate: (date: string) => void;
     addCalories: (food: Meal) => void;
     deleteMeal: (id: string) => void;
@@ -27,8 +36,55 @@ interface FoodContextType{
 const FoodContext = createContext <FoodContextType | undefined> (undefined);
 
 export function FoodProvider({children}: {children: React.ReactNode}) {
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+    const [calorieGoal, setCalorieGoal] = useState('2500');
+    const [carbGoal, setCarbGoal] = useState('300g');
+    const [fatGoal, setFatGoal] = useState('80g');
+    const [proteinGoal, setProteinGoal] = useState('150g')
+    const [isloaded, setIsLoaded] = useState(false);
     const [allMeals, setAllMeals] = useState<Meal[]>([]);
+
+    useEffect(()=>{
+        const loadData = async()=>{
+            try{
+                const savedMeals = await AsyncStorage.getItem('allMeals');
+                const savedCal = await AsyncStorage.getItem('calorieGoal');
+                const savedCarb = await AsyncStorage.getItem('carbGoal');
+                const savedFat = await AsyncStorage.getItem('fatGoal')
+                const savedProtein = await AsyncStorage.getItem('proteinGoal');
+
+                if(savedMeals) setAllMeals(JSON.parse(savedMeals));
+                if(savedCal) setCalorieGoal(savedCal);
+                if(savedCarb) setCarbGoal(savedCarb);
+                if(savedFat) setFatGoal(savedFat);
+                if(savedProtein) setProteinGoal(savedProtein);
+            } catch (error){
+                console.error('Failed to load data', error);
+            } finally{
+                setIsLoaded(true);
+            }
+        };
+        loadData();
+    }, []);
+
+    useEffect(()=>{
+        if(!isloaded) return;
+
+        const saveData = async ()=> {
+            try{
+                await AsyncStorage.setItem('allMeals', JSON.stringify(allMeals));
+                await AsyncStorage.setItem('calorieGoal', calorieGoal);
+                await AsyncStorage.setItem('carbGoal', carbGoal);
+                await AsyncStorage.setItem('fatGoal', fatGoal);
+                await AsyncStorage.setItem('proteinGoal', proteinGoal);
+            } catch (error) {
+                console.error("Failed to save data", error)
+            }
+        };
+        saveData();
+    }, [allMeals, calorieGoal, carbGoal, fatGoal, proteinGoal]);
+
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+    
 
     const filteredMeals = allMeals.filter(meal => meal.date === selectedDate);
     
@@ -48,7 +104,20 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
     };
 
     return(
-        <FoodContext.Provider value = {{totalCalories, meals: filteredMeals, addCalories, deleteMeal, updateMeal, setSelectedDate, selectedDate}}>
+        <FoodContext.Provider value = {{
+            totalCalories, 
+            meals: filteredMeals, 
+            addCalories, 
+            deleteMeal, 
+            updateMeal, 
+            setSelectedDate, 
+            selectedDate, 
+            
+            calorieGoal, setCalorieGoal,
+            carbGoal, setCarbGoal,
+            fatGoal, setFatGoal,
+            proteinGoal, setProteinGoal
+            }}>
             {children}
         </FoodContext.Provider>
     );

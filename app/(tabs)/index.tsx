@@ -7,13 +7,13 @@ import { THEME } from '../../constants/theme';
 
 
 export default function CalTracker() {
-  const {totalCalories, meals, deleteMeal, selectedDate, setSelectedDate} = useFood();
+  const {totalCalories, meals, deleteMeal, selectedDate, setSelectedDate, calorieGoal} = useFood();
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
-  const GOAL = 2500;
+  const GOAL = calorieGoal;
   const exercise = 0;
-  const remaining = 2500 - totalCalories;
+  const remaining = Number(calorieGoal) - totalCalories;
 
   const getDisplayDate = () => {
     const today = new Date().toISOString().split('T')[0];

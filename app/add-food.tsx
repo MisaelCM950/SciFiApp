@@ -56,12 +56,10 @@ export default function AddFoodScreen(){
                     }}/>
                 ))}
                 <View style={{alignItems: 'center'}}>
-                    <TouchableOpacity style={styles.customFood} onPress={
-                        () => router.push({
-                            pathname: '/custom-food',
-                            params: {selectedCategory}
-                        })
-                        }>
+                    <TouchableOpacity style={styles.customFood} onPress={() => router.push({
+                        pathname: '/custom-food',
+                        params: {selectedCategory}
+                    })}>
                         <Text style={[styles.buttonText, {fontSize: 15}]}>Custom Food?</Text>
                     </TouchableOpacity>
                 </View>

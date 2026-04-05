@@ -15,12 +15,11 @@ export default function AddFoodSettingScreen(){
     const [fat, setFat] = useState('');
     const [protein, setProtein] = useState('');
 
-// Prevent diving by 0 if a food has 0 macros (like water)
 
     const handleAdd = () => {
 
         if(!name.trim()){
-            alert('Please enter a food name.')
+            alert('Please enter a food name.');
             return;
         }
 

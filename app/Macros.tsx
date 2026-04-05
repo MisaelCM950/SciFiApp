@@ -6,28 +6,26 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function MacroScreen(){
    const router = useRouter(); 
-   const { meals, totalCalories } = useFood(); // Grab all the foods eaten today
+   const { meals, totalCalories, calorieGoal, carbGoal, proteinGoal, fatGoal } = useFood();
 
-   const CALORIE_GOAL = 2500;
-   const CARB_GOAL = 300;
-   const FAT_GOAL = 80;
-   const PROTEIN_GOAL = 150;
+   const CALORIE_GOAL = Number(calorieGoal) || 2500;
+   const CARB_GOAL = Number(carbGoal) || 300;
+   const FAT_GOAL = Number(fatGoal) || 80;
+   const PROTEIN_GOAL = Number(proteinGoal) || 150;
 
-    // 1. THE MATH: The Cashier adds up all the carbs, fat, and protein
     const totalCarbs = meals.reduce((sum, meal) => sum + ((meal.carbs || 0) * (meal.quantity || 1)), 0);
     const totalFat = meals.reduce((sum, meal) => sum + ((meal.fat || 0) * (meal.quantity || 1)), 0);
     const totalProtein = meals.reduce((sum, meal) => sum + ((meal.protein || 0) * (meal.quantity || 1)), 0);
 
-    // 2. Add them all together to find the 100% mark
     const totalMacros = totalCarbs + totalFat + totalProtein;
 
-    // 3. Prevent dividing by 0 (The exact same logic you mastered in Settings!)
+
     const caloriePct = (totalCalories / CALORIE_GOAL) * 100;
     const carbsPct= (totalCarbs / CARB_GOAL) * 100;
     const fatPct = (totalFat / FAT_GOAL) * 100;
     const proteinPct = (totalProtein / PROTEIN_GOAL) * 100;
 
-    // 4. Remaining Math
+
     const calLeft = CALORIE_GOAL - totalCalories;
     const carbsLeft = CARB_GOAL - Math.round(totalCarbs);
     const fatLeft = FAT_GOAL - Math.round(totalFat);
