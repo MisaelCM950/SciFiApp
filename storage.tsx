@@ -43,6 +43,7 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
     const [isloaded, setIsLoaded] = useState(false);
     const [allMeals, setAllMeals] = useState<Meal[]>([]);
 
+
     useEffect(()=>{
         const loadData = async()=>{
             try{
@@ -66,6 +67,7 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
         loadData();
     }, []);
 
+
     useEffect(()=>{
         if(!isloaded) return;
 
@@ -82,6 +84,7 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
         };
         saveData();
     }, [allMeals, calorieGoal, carbGoal, fatGoal, proteinGoal]);
+
 
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
     

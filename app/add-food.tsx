@@ -1,5 +1,7 @@
 import FoodResultItem from '@/components/FoodResultItem';
 import { THEME } from '@/constants/theme';
+import { FontAwesome } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -10,12 +12,91 @@ export default function AddFoodScreen(){
    const {selectedCategory} = useLocalSearchParams();
    const [searchQuery, setSearchQuery] = useState('');
    
+   
    const filteredFood = FOOD_DATABASE.filter((item) =>{
     const itemName = item.name.toLowerCase();
     const userTyped = searchQuery.toLowerCase();
     
     return itemName.includes(userTyped);
    });
+   // Voice Recording Feature
+   const [recording, setRecording] = useState<Audio.Recording | undefined>(undefined);
+   const [permissionResponse, requestPermission] = Audio.usePermissions();
+   const [isRecording, setIsRecording] = useState(false);
+
+   async function startRecording(){
+    try{
+        if (permissionResponse?.status !== 'granted'){
+            await requestPermission();
+        }
+        await Audio.setAudioModeAsync({
+            allowsRecordingIOS: true,
+            playsInSilentModeIOS: true,
+        });
+        const {recording} = await Audio.Recording.createAsync(
+            Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+
+        setRecording(recording);
+        setIsRecording(true);
+    } catch (error){
+        console.error('Failed to start recording', error);
+    }
+   }
+
+   async function stopRecording() {
+    if (!recording) return;
+
+    setIsRecording(false);
+    setRecording(undefined);
+
+    await recording.stopAndUnloadAsync();
+    await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+    });
+
+    const uri = recording.getURI();
+    console.log('Recording stopped! The file is saved at: ', uri);
+    if(uri) {
+        await transcribeAudio(uri);
+    }
+   }
+
+   async function transcribeAudio(audioUri: string){
+    try{
+        console.log("Sending to OpenAI...");
+        const formData = new FormData();
+
+        formData.append('file', {
+            uri: audioUri,
+            type: 'audio/m4a',
+            name: 'audio.m4a',
+        } as any);
+
+        formData.append('model', 'whisper-1');
+
+        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_KEY}`,
+                'Content-Type': 'multipart/form-data',
+            },
+            body: formData,
+        });
+
+        const data = await response.json();
+        
+        if(data.text) {
+            console.log("AI Heard:", data.text);
+            alert(`You said: "${data.text}"`);
+        } else{
+            console.error('OpenAI Error:', data)
+        }
+
+    } catch (error) {
+        console.error("Failed to transcribe", error)
+    }
+   }
    
     return(
  
@@ -55,12 +136,20 @@ export default function AddFoodScreen(){
                         });
                     }}/>
                 ))}
-                <View style={{alignItems: 'center'}}>
-                    <TouchableOpacity style={styles.customFood} onPress={() => router.push({
+                <View style={{gap: 15, flexDirection: 'row', justifyContent: 'center'}}>
+                    <TouchableOpacity style={styles.optionButtons} onPress={() => router.push({
                         pathname: '/custom-food',
                         params: {selectedCategory}
                     })}>
                         <Text style={[styles.buttonText, {fontSize: 15}]}>Custom Food?</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style ={styles.optionButtons} 
+                    onPress={recording ? stopRecording : startRecording}>
+                        <FontAwesome
+                            name='microphone'
+                            size={24}
+                            color={isRecording ? '#ff4444' : '#00f2ff'}
+                        />
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -70,7 +159,7 @@ export default function AddFoodScreen(){
     
 )};
 const styles = StyleSheet.create({
-    customFood: {
+    optionButtons: {
         marginTop: 30,
         borderWidth: 1,
         borderStyle: 'dashed',
