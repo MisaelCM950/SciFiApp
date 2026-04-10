@@ -1,9 +1,11 @@
 import { useFood } from '@/storage';
+import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MealSection from '../../components/MealSection';
 import { THEME } from '../../constants/theme';
+
 
 
 export default function CalTracker() {
@@ -16,26 +18,21 @@ export default function CalTracker() {
   const remaining = Number(calorieGoal) - totalCalories;
 
   const getDisplayDate = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = dayjs().format('YYYY-MM-DD');
     if(selectedDate === today) return "Today";
     
-    const [year, month, day] = selectedDate.split('-').map(Number);
-    const dateObj = new Date(year, month - 1, day);
-    return dateObj.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+    return dayjs(selectedDate).format('MMM D, YYYY');
     }
 
   const changeDate = (direction: 'prev'| 'next') => {
-    const [year, month, day] = selectedDate.split('-').map(Number);
-    const newDate  = new Date(year, month - 1, day);
-
-    if(direction === 'prev') newDate.setDate(newDate.getDate() - 1);
-    if(direction === 'next') newDate.setDate(newDate.getDate() + 1);
-
-    const y = newDate.getFullYear();
-    const m = String(newDate.getMonth() + 1).padStart(2, '0');
-    const d = String(newDate.getDate()).padStart(2, '0');
-
-    setSelectedDate(`${y}-${m}-${d}`);
+    if(direction === 'prev') {
+        const yesterday = dayjs(selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
+        setSelectedDate(yesterday);
+    }
+    if(direction === 'next') {
+        const tomorrow = dayjs(selectedDate).add(1, 'day').format('YYYY-MM-DD');
+        setSelectedDate(tomorrow);
+    }
   };
 
 

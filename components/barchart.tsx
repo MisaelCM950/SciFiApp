@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     macroValue: {
         color: '#aaa',
         fontSize: 16,
-        width:35,
+        width:38,
         textAlign: 'center'
     },
     barFill:{

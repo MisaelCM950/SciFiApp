@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import dayjs from 'dayjs';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface Meal{
@@ -85,8 +86,9 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
         saveData();
     }, [allMeals, calorieGoal, carbGoal, fatGoal, proteinGoal]);
 
-
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+    const now = new Date();
+    const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const [selectedDate, setSelectedDate] = useState(dayjs().format('YYYY-MM-DD'));
     
 
     const filteredMeals = allMeals.filter(meal => meal.date === selectedDate);

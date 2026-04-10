@@ -2,10 +2,12 @@ import FoodResultItem from '@/components/FoodResultItem';
 import { THEME } from '@/constants/theme';
 import { useFood } from '@/storage';
 import { FontAwesome } from '@expo/vector-icons';
+import dayjs from 'dayjs';
 import { Audio } from 'expo-av';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { FOOD_DATABASE } from '../constants/Food-data';
 
 export default function AddFoodScreen(){
@@ -22,7 +24,96 @@ export default function AddFoodScreen(){
     
     return itemName.includes(userTyped);
    });
-   
+
+
+   // Barcode Scanning
+   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+   const [isScanning, setIsScanning] = useState(false);
+   const [isLookingUp, setIsLookingUp] = useState(false);
+   const scanLock = useRef(false);
+
+   async function openScanner(){
+    scanLock.current = false;
+    if(!cameraPermission?.granted) {
+        const permission = await requestCameraPermission();
+        if(!permission.granted){
+            alert("We need camera permission to scan barcodes!");
+            return;
+        }
+    }
+    setIsScanning(true);
+   }
+    
+   function parseMacro(value: any){
+        if(value === undefined || value === null || isNaN(value)) return 0;
+        const rawNumber = Number(value);
+        return Math.round(rawNumber * 10) / 10;
+   }
+   async function handleBarcodeScanned({data}: {data: string}){
+
+        if(scanLock.current) return;
+        scanLock.current = true;
+        setIsLookingUp(true);
+
+        try{
+            console.log("Scanned Barcode:", data);
+            const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${data}.json`);
+            if(!response.ok){
+                alert("This barcode isn't in the database yet!");
+                setIsScanning(false);
+                setIsLookingUp(false);
+                scanLock.current = false;
+                return;
+            }
+            const result = await response.json();
+
+            if(result.status === 1){
+                const product = result.product;
+                const nutriments = product.nutriments;
+
+                const localDate = dayjs().format('YYYY-MM-DD');
+
+                const cals100 = parseMacro(nutriments['energy-kcal_100g'] || nutriments['energy-kcal']);
+                const protein100 = parseMacro(nutriments.proteins_100g);
+                const carbs100 = parseMacro(nutriments.carbohydrates_100g);
+                const fat100 = parseMacro(nutriments.fat_100g);
+
+                const scannedItem = {
+                    id: Date.now().toString(),
+                    name: `${product.product_name || "Scanned Food"}`,
+                    calories:cals100 / 100,
+                    protein: protein100 / 100,
+                    carbs: carbs100 / 100,
+                    fat: fat100 / 100,
+                    date: localDate,
+                    quantity: 100, 
+                    baseCalories: cals100 / 100,
+                    mealType: (selectedCategory as string) || "Breakfast"
+                };
+                
+                setIsScanning(false);
+
+                router.push({
+                    pathname: '/add-food-setting',
+                    params: {
+                        ...scannedItem,
+                        selectedCategory
+                    }
+                })
+            } else {
+                alert("Food not found in database! Try typing it or using your voice.");
+                setIsScanning(false);
+            } 
+        } catch (error){
+            console.error("Barcode lookup failed", error);
+            alert("Network error while looking up barcode.");
+            setIsScanning(false)
+        } finally {
+            setIsLookingUp(false);
+        }
+   }
+
+
    // Voice Recording Feature
 
    const [recording, setRecording] = useState<Audio.Recording | undefined>(undefined);
@@ -161,9 +252,8 @@ export default function AddFoodScreen(){
         const data = await response.json();
         const aiReply = data.choices[0].message.content;
         const macroData = JSON.parse(aiReply);
-        const now = new Date();
-        const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}-${String(now.getDate()).padStart(2, '0')}`;
-
+        const localDate = dayjs().format('YYYY-MM-DD');
+        
         console.log("AI Extracted Macros:", macroData)
         const newMeal = {
             id: Date.now().toString(),
@@ -172,7 +262,7 @@ export default function AddFoodScreen(){
             protein: macroData.protein,
             carbs: macroData.carbs,
             fat: macroData.fat,
-            date: new Date().toISOString().split('T')[0],
+            date: localDate,
             baseCalories: macroData.calories / (macroData.quantity || 1),
             quantity: macroData.quantity || 1,
             mealType: (selectedCategory as string)|| 'Breakfast'
@@ -247,9 +337,43 @@ export default function AddFoodScreen(){
                             color={isRecording ? '#ff4444' : '#00f2ff'}
                         />)}
                     </TouchableOpacity>
+                    <TouchableOpacity style={styles.optionButtons} onPress={openScanner}>
+                        <FontAwesome        
+                            name= 'camera'
+                            size= {24}
+                            color= "#00f2ff"
+                        />
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
             
+            {/* Modal Camera Screen */}
+            <Modal visible={isScanning} animationType='slide' presentationStyle='pageSheet'>
+                <View style={{flex:1, backgroundColor: '#000', justifyContent: 'center'}}>
+                    <CameraView
+                        style={{flex: 1}}
+                        facing='back'
+                        onBarcodeScanned={isLookingUp ? undefined : handleBarcodeScanned}
+                        barcodeScannerSettings={{
+                            barcodeTypes: ['upc_a', 'upc_e', "ean8", 'ean13']
+                        }}
+                    />
+
+                    {isLookingUp && (
+                        <View style={[StyleSheet.absoluteFillObject, {backgroundColor: 'rgba(0,0,0,0.6)', justifyContent:"center", alignItems: 'center'}]}>
+                            <ActivityIndicator size="large" color='#00f2ff'/>
+                            <Text style={{color: "#00f2ff", marginTop: 10, fontWeight: 'bold'}}>Looking up food...</Text>
+                        </View>
+                    )}
+
+                    <TouchableOpacity style={{position: 'absolute', top: 50, right: 20, backgroundColor: '#333', padding: 15, borderRadius: 50}}
+                    onPress={()=> setIsScanning(false)}
+                    >
+                        <Text style={{color: '#fff', fontWeight: 'bold'}}>Close</Text>
+                    </TouchableOpacity>
+
+                </View>
+            </Modal>
         </View>
 
     

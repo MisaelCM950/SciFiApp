@@ -1,7 +1,8 @@
 import { Macrobar } from '@/components/barchart';
+import { THEME } from '@/constants/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { useFood } from '../storage';
 
 export default function AddFoodSettingScreen(){
@@ -16,11 +17,12 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
     const {addCalories, updateMeal, selectedDate} = useFood();
    const router = useRouter(); 
 // Convert strings to numbers
-    const c = Number(carbs) * Number(quantity || 0);
-    const f = Number(fat) * Number(quantity || 0);
-    const p = Number(protein) * Number(quantity || 0);
+    const safeQuantity = parseFloat(quantity)|| 0;
+    const c = Math.round(Number(carbs) * (safeQuantity) * 10) / 10;
+    const f = Math.round(Number(fat) * (safeQuantity) * 10) / 10;
+    const p = Math.round(Number(protein) * (safeQuantity) * 10) / 10;
     const baseCal = Number(baseCalories) || Number(calories) || 0;
-    const calculatedCalories = baseCal * Number(quantity) || 0;
+    const calculatedCalories =  Math.round(baseCal *safeQuantity) || 0;
 
     const totalMacros = c + f + p;
 
@@ -54,6 +56,7 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
 
    
     return(
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.buttonStyle}onPress={()=> router.back()}>
@@ -65,7 +68,10 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
                 </TouchableOpacity>
             </View>
             
-            <Text style={styles.title}>Add {name}</Text>
+            <Text style={[styles.title, {marginBottom: 40, textAlign: 'center'}]}>
+                <Text style={{color: THEME.color.accent}}>Add </Text>
+                <Text>{name}</Text>
+            </Text>
 
             <View style={[styles.formContainer]}>
                 <View style={styles.settingsRow}>
@@ -112,9 +118,9 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
 
                     <Text style={styles.sectionTitle}>Macros</Text>
                     <View style={styles.chartArea}>
-                        <Macrobar label="Carbs" grams={Math.round(c)} percentage={carbsPct} color="#00f2ff"/>
-                        <Macrobar label="Fat" grams={Math.round(f)} percentage={fatPct} color="#ff4444"/>
-                        <Macrobar label="Protein" grams={Math.round(p)} percentage={proteinPct} color="#00ff44"/>
+                        <Macrobar label="Carbs" grams={c} percentage={carbsPct} color="#00f2ff"/>
+                        <Macrobar label="Fat" grams={f} percentage={fatPct} color="#ff4444"/>
+                        <Macrobar label="Protein" grams={p} percentage={proteinPct} color="#00ff44"/>
                     </View>
                 </View>
             </View>
@@ -124,6 +130,7 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
 
            
         </View>
+        </TouchableWithoutFeedback>
 
     
 )};
@@ -196,7 +203,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         justifyContent:'space-between', 
         flexDirection:'row', 
-        paddingTop: 10
+        paddingTop: 10,
+        marginBottom: 10
     },
     inputContainer:{
         width:'30%'
@@ -207,8 +215,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingTop: 5
         },
-    title:{color: '#fff', fontSize:24, fontWeight: 'bold', letterSpacing: 2, marginBottom: 40},
-    buttonStyle:{borderColor: "#00f2ff", borderWidth: 1, padding: 15, borderStyle: 'dashed'},
+    title:{color: '#fff', fontSize:24, fontWeight: 'bold', letterSpacing: 2},
+    buttonStyle:{borderColor: THEME.color.accent, borderWidth: 1, padding: 15, borderStyle: 'dashed'},
     optionInput:{
         height:50, 
         color: '#00f2ff', 
