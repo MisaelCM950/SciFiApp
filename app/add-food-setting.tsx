@@ -3,26 +3,56 @@ import { THEME } from '@/constants/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import { useFood } from '../storage';
 
 export default function AddFoodSettingScreen(){
 // Receive properties
-const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: savedQuantity, selectedCategory, isEditing} = useLocalSearchParams();
-    const [unit, setUnit] = useState('g');
+const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: savedQuantity, selectedCategory, isEditing, servingSize, servingName, unitName: savedUnitName} = useLocalSearchParams();
     const [quantity, setQuantity] = useState(savedQuantity ? String(savedQuantity): '1');
     const [mealType, setMealType] = useState(selectedCategory ||'Breakfast');
 
-   
+    const safeServingGrams = parseFloat(servingSize as string) || 100;
 
+    const availableUnits = [
+        {label: '1 g', gramMultiplier: 1},
+        {label: '1 oz', gramMultiplier: 28.35},
+        {label: '1 kg', gramMultiplier: 1000}
+    ]
+
+        if (servingName && servingSize) {
+        availableUnits.unshift({ 
+            label: servingName as string, 
+            gramMultiplier: safeServingGrams 
+        });
+    }
+    const initialUnit = availableUnits.find(u => u.label === savedUnitName) || availableUnits[0];
+    const [selectedUnit, setSelectedUnit] = useState(initialUnit);
+    const userTypedAmount = parseFloat(quantity) || 0;
+   const trueGramWeight = userTypedAmount * selectedUnit.gramMultiplier;
+
+
+
+    
+
+    // Dropdown
+
+    const renderItem = (item: any) => {
+        return(
+            <View style={[styles.dropdownItem, item.label === selectedUnit.label && {backgroundColor: '#004042'}]}>
+                <Text style={styles.textItem}>{item.label}</Text>
+            </View>
+        );
+    };
     const {addCalories, updateMeal, selectedDate} = useFood();
-   const router = useRouter(); 
-// Convert strings to numbers
+    const router = useRouter(); 
+
     const safeQuantity = parseFloat(quantity)|| 0;
-    const c = Math.round(Number(carbs) * (safeQuantity) * 10) / 10;
-    const f = Math.round(Number(fat) * (safeQuantity) * 10) / 10;
-    const p = Math.round(Number(protein) * (safeQuantity) * 10) / 10;
+    const c = Math.round(Number(carbs) * (trueGramWeight) * 10) / 10;
+    const f = Math.round(Number(fat) * (trueGramWeight) * 10) / 10;
+    const p = Math.round(Number(protein) * (trueGramWeight) * 10) / 10;
     const baseCal = Number(baseCalories) || Number(calories) || 0;
-    const calculatedCalories =  Math.round(baseCal *safeQuantity) || 0;
+    const calculatedCalories =  Math.round(baseCal * trueGramWeight) || 0;
 
     const totalMacros = c + f + p;
 
@@ -41,6 +71,9 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
             fat: Number(fat),
             protein: Number(protein),
             quantity: Number(quantity),
+            unitName: selectedUnit.label,
+            servingSize: Number(safeServingGrams),
+            servingName: servingName as string,
             calories: calculatedCalories,
             brand: brand as string,
             mealType: mealType as string,
@@ -76,13 +109,22 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
             <View style={[styles.formContainer]}>
                 <View style={styles.settingsRow}>
                     <Text style={styles.baseText}>Serving Size</Text>
-                        <View style={styles.inputContainer}>
-                            <TextInput style={styles.optionInput} 
-                            placeholder='1 g' 
-                            placeholderTextColor= '#00f2ff'
-                            />
-                            <View style={styles.glowLine}/>
-                        </View>
+                    
+                        <Dropdown
+                            style={styles.dropdown}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            data={availableUnits}
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="label"
+                            placeholder={selectedUnit.label}
+                            value={selectedUnit}
+                            onChange={item => {
+                                setSelectedUnit(item);
+                            }}
+                            renderItem={renderItem}
+                        />
+                        
                 </View>
 
                 <View style={styles.settingsRow}>
@@ -135,6 +177,35 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
     
 )};
 const styles = StyleSheet.create({
+    dropdown:{
+        backgroundColor: THEME.color.border,
+        borderRadius: 8,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        width: 110
+    },
+    selectedTextStyle:{
+        color: THEME.color.accent,
+        fontWeight: 'bold',
+        textAlign: 'center'
+    },
+    dropdownItem: {
+        padding: 15,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#001a1c',
+        borderBottomWidth: 1,
+        borderBottomColor: '#004042'
+    },
+    textItem:{
+        color: '#fff',
+        fontSize: 16
+    },
+
+
+
+
    baseText:{
         color: '#fff',
         fontSize: 18,

@@ -7,7 +7,8 @@ import { THEME } from '../constants/theme';
 
 
 export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:string) => void}) {
-  const router = useRouter();
+  
+    const router = useRouter();
   const renderRightActions = () => (
     <View style={styles.deleteBackground}>
       <Text style={styles.deleteText}>DELETE</Text>
@@ -34,8 +35,8 @@ export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:str
         <View style={styles.leftColumn}>
           <Text style={styles.baseText}>{meal.name}</Text>
           <View style={styles.detailsRow}>
-              <Text style={[styles.baseText, styles.details]}>{meal.brand || 'Generic'}</Text> 
-              <Text style={[styles.baseText, styles.details]}>{meal.quantity || 1} Serving</Text>
+              <Text style={[styles.baseText, styles.details]}>{meal.brand}</Text> 
+              <Text style={[styles.baseText, styles.details]}>{meal.quantity || 1} {meal.servingName}</Text>
           </View>
         </View>
         <Text style={styles.baseText}>{meal.calories}</Text>

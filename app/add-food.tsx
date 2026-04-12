@@ -10,6 +10,14 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { FOOD_DATABASE } from '../constants/Food-data';
 
+function formatFoodName(text: string){
+    if (!text) return "Uknown Food";
+    return text
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+}
+
 export default function AddFoodScreen(){
     const {addCalories} = useFood();
 
@@ -78,17 +86,25 @@ export default function AddFoodScreen(){
                 const carbs100 = parseMacro(nutriments.carbohydrates_100g);
                 const fat100 = parseMacro(nutriments.fat_100g);
 
+                const servingGrams = parseFloat(product.serving_quantity) || 100;
+                const servingText = product.serving_size || '100g';
+                const rawBrand = product.brands ? product.brands.split(',')[0] : "Generic";
+                const cleanBrand = formatFoodName(rawBrand);
+
                 const scannedItem = {
                     id: Date.now().toString(),
-                    name: `${product.product_name || "Scanned Food"}`,
+                    name: formatFoodName(product.product_name || "Scanned Food"),
                     calories:cals100 / 100,
                     protein: protein100 / 100,
                     carbs: carbs100 / 100,
                     fat: fat100 / 100,
                     date: localDate,
-                    quantity: 100, 
                     baseCalories: cals100 / 100,
-                    mealType: (selectedCategory as string) || "Breakfast"
+                    mealType: (selectedCategory as string) || "Breakfast",
+                    servingSize: servingGrams,
+                    servingName: servingText,
+                    quantity: 1,
+                    brand: cleanBrand
                 };
                 
                 setIsScanning(false);
@@ -257,7 +273,7 @@ export default function AddFoodScreen(){
         console.log("AI Extracted Macros:", macroData)
         const newMeal = {
             id: Date.now().toString(),
-            name: macroData.name,
+            name: formatFoodName(macroData.name),
             calories: macroData.calories,
             protein: macroData.protein,
             carbs: macroData.carbs,

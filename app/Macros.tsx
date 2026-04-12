@@ -3,7 +3,6 @@ import { useFood } from '@/storage';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-
 export default function MacroScreen(){
    const router = useRouter(); 
    const { meals, totalCalories, calorieGoal, carbGoal, proteinGoal, fatGoal } = useFood();
