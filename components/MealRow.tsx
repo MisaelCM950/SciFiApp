@@ -9,6 +9,15 @@ import { THEME } from '../constants/theme';
 export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:string) => void}) {
   
     const router = useRouter();
+
+    let formattedServing = "";
+    const q = meal.quantity || 1;
+    if (meal.quantity === '1 g') formattedServing = `${q} g`;
+    else if (meal.quantity === '1 oz') formattedServing = `${q} oz`;
+    else if (meal.quantity === '1 kg') formattedServing = `${q} kg`;
+    else{
+        formattedServing = q ===  1 ? meal.unitName : `${q} x ${meal.unitName}`;
+    }
   const renderRightActions = () => (
     <View style={styles.deleteBackground}>
       <Text style={styles.deleteText}>DELETE</Text>
@@ -36,7 +45,7 @@ export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:str
           <Text style={styles.baseText}>{meal.name}</Text>
           <View style={styles.detailsRow}>
               <Text style={[styles.baseText, styles.details]}>{meal.brand}</Text> 
-              <Text style={[styles.baseText, styles.details]}>{meal.quantity || 1} {meal.servingName}</Text>
+              <Text style={[styles.baseText, styles.details]}>{formattedServing}</Text>
           </View>
         </View>
         <Text style={styles.baseText}>{meal.calories}</Text>

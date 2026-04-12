@@ -7,9 +7,10 @@ import { Audio } from 'expo-av';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Animated, Easing, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { FOOD_DATABASE } from '../constants/Food-data';
 
+// Capitalize Food Names
 function formatFoodName(text: string){
     if (!text) return "Uknown Food";
     return text
@@ -18,14 +19,21 @@ function formatFoodName(text: string){
         .join(' ');
 }
 
-export default function AddFoodScreen(){
-    const {addCalories} = useFood();
+// Check value and make the macros have one decimal
+function parseMacro(value: any){
+    if(value === undefined || value === null || isNaN(value)) return 0;
+    const rawNumber = Number(value);
+    return Math.round(rawNumber * 10) / 10;
+}
 
+export default function AddFoodScreen(){
+
+    const {addCalories} = useFood();
    const router = useRouter(); 
    const {selectedCategory} = useLocalSearchParams();
    const [searchQuery, setSearchQuery] = useState('');
    
-   
+   //Searching Food
    const filteredFood = FOOD_DATABASE.filter((item) =>{
     const itemName = item.name.toLowerCase();
     const userTyped = searchQuery.toLowerCase();
@@ -34,12 +42,46 @@ export default function AddFoodScreen(){
    });
 
 
-   // Barcode Scanning
+   // Barcode Scanning Variables
    const [cameraPermission, requestCameraPermission] = useCameraPermissions();
    const [isScanning, setIsScanning] = useState(false);
    const [isLookingUp, setIsLookingUp] = useState(false);
    const scanLock = useRef(false);
 
+
+   // --- Scanner Animation Engine ---
+
+   const scanLineAnim = useRef(new Animated.Value(0)).current;
+
+   useEffect(()=>{
+    if(isScanning){
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(scanLineAnim, {
+                toValue: 1,
+                duration: 2000,
+                useNativeDriver: true,
+                easing: Easing.inOut(Easing.ease)
+            }),
+            Animated.timing(scanLineAnim, {
+                toValue: 0,
+                duration: 2000,
+                useNativeDriver: true,
+                easing: Easing.inOut(Easing.ease)
+            })
+          ])  
+        ).start();
+    } else {
+        scanLineAnim.setValue(0);
+    }
+   }, [isScanning]);
+
+   const scanLineTranslateY = scanLineAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 248]
+   });
+
+   // Open Camera
    async function openScanner(){
     scanLock.current = false;
     if(!cameraPermission?.granted) {
@@ -52,11 +94,7 @@ export default function AddFoodScreen(){
     setIsScanning(true);
    }
     
-   function parseMacro(value: any){
-        if(value === undefined || value === null || isNaN(value)) return 0;
-        const rawNumber = Number(value);
-        return Math.round(rawNumber * 10) / 10;
-   }
+   // Scan the Barcode
    async function handleBarcodeScanned({data}: {data: string}){
 
         if(scanLock.current) return;
@@ -132,11 +170,14 @@ export default function AddFoodScreen(){
 
    // Voice Recording Feature
 
+   // Variables
    const [recording, setRecording] = useState<Audio.Recording | undefined>(undefined);
    const [permissionResponse, requestPermission] = Audio.usePermissions();
    const [isRecording, setIsRecording] = useState(false);
 
    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+   // Prevent Microphone From Staying On
    useEffect(()=>{
         return() =>{
             if (recording){
@@ -146,7 +187,6 @@ export default function AddFoodScreen(){
         };
    }, [recording]);
    
-
    async function startRecording(){
     try{
         if (recording){
@@ -201,6 +241,7 @@ export default function AddFoodScreen(){
 
    //API
 
+   // Transcribe Speech to Audio
    async function transcribeAudio(audioUri: string){
     try{
         console.log("Sending to OpenAI...");
@@ -238,7 +279,7 @@ export default function AddFoodScreen(){
     }
    }
 
-
+   // Analyze Text with GPT-4o-mini
    async function analyzeFoodText(foodSentence: string){
     try{
         console.log("Asking AI for macros...");
@@ -319,6 +360,7 @@ export default function AddFoodScreen(){
 
             <Text style={styles.debugText}>SEARCHING FOR: {searchQuery.toUpperCase()}</Text>
 
+        {/* Results*/}
             <ScrollView style={styles.resultsContainer}>
                 {filteredFood.map((item) =>(
                     <FoodResultItem
@@ -373,7 +415,15 @@ export default function AddFoodScreen(){
                         barcodeScannerSettings={{
                             barcodeTypes: ['upc_a', 'upc_e', "ean8", 'ean13']
                         }}
-                    />
+                    >
+                        <View style={styles.scannerContainer}>
+                            <View style={styles.scannerBox}>
+                                <Animated.View 
+                                    style={[styles.scannerLine, {transform: [{translateY: scanLineTranslateY}]}]}
+                                />
+                            </View>
+                        </View>
+                    </CameraView>
 
                     {isLookingUp && (
                         <View style={[StyleSheet.absoluteFillObject, {backgroundColor: 'rgba(0,0,0,0.6)', justifyContent:"center", alignItems: 'center'}]}>
@@ -395,6 +445,30 @@ export default function AddFoodScreen(){
     
 )};
 const styles = StyleSheet.create({
+    scannerContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    scannerBox: {
+        width: 250,
+        height: 250,
+        borderWidth: 2,
+        borderColor: '#00f2ff',
+        backgroundColor: 'rgba(0, 242, 255, 0.05)',
+        borderRadius: 15,
+        overflow: 'hidden',
+    },
+    scannerLine: {
+        width: '100%',
+        height: 3,
+        backgroundColor: '#00f2ff',
+        shadowColor: '#00f2ff',
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
     optionButtons: {
         marginTop: 30,
         borderWidth: 1,
