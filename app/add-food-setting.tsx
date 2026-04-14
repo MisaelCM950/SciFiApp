@@ -67,9 +67,9 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
             id: isEditing === 'true' ? (id as string) : Date.now().toString(),
             name: name as string,
             baseCalories: baseCal,
-            carbs: Number(carbs),
-            fat: Number(fat),
-            protein: Number(protein),
+            carbs: Number(carbs) * trueGramWeight,
+            fat: Number(fat)* trueGramWeight,
+            protein: Number(protein) * trueGramWeight,
             quantity: Number(quantity),
             unitName: selectedUnit.label,
             servingSize: Number(safeServingGrams),
@@ -101,10 +101,11 @@ const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: s
                 </TouchableOpacity>
             </View>
             
-            <Text style={[styles.title, {marginBottom: 40, textAlign: 'center'}]}>
+            <Text style={[styles.title, {marginBottom: 20, textAlign: 'center'}]}>
                 <Text style={{color: THEME.color.accent}}>Add </Text>
                 <Text>{name}</Text>
             </Text>
+            <Text style={{color: '#fff', marginBottom: 20, fontWeight: 'bold'}}>{brand}</Text>
 
             <View style={[styles.formContainer]}>
                 <View style={styles.settingsRow}>

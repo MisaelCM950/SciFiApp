@@ -94,6 +94,94 @@ export default function AddFoodScreen(){
     setIsScanning(true);
    }
     
+   // USDA API for Search Feature
+   const [searchResults, setSearchResults] = useState<any[]>([]);
+   const [isSearchingText, setIsSearchingText] = useState(false);
+
+   async function searchFoodAPI(query: string){
+        if (!query.trim()) return;
+
+        setIsSearchingText(true);
+        try {
+            console.log("Searching FatSecret for:", query);
+            const clientSecret = process.env.EXPO_PUBLIC_FS_CLIENT_SECRET;
+            const clientId = process.env.EXPO_PUBLIC_FS_CLIENT_ID;
+            
+
+            if(!clientId || !clientSecret){
+                alert("Missing FatSecret keys in .env!");
+                    setIsSearchingText(false);
+                    return;
+            }
+            const tokenResponse = await fetch('https://oauth.fatsecret.com/connect/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
+            });
+            
+            if(!tokenResponse.ok){
+                console.error("Auth failed:", await tokenResponse.text())
+                alert("Server error from database.");
+                setIsSearchingText(false);
+                return;
+            }
+
+            const tokenData = await tokenResponse.json();
+            const accessToken = tokenData.access_token;
+//
+            const safeQuery = encodeURIComponent(query);
+            const searchResponse = await fetch(`https://platform.fatsecret.com/rest/server.api?method=foods.search&search_expression=${safeQuery}&format=json&max_results=20`, {
+                method: 'GET',
+                headers: {'Authorization': `Bearer ${accessToken}`}
+            });
+
+            const result = await searchResponse.json();
+            console.log("FatSecret Raw Data:", JSON.stringify(result, null, 2));
+//
+            if(result.foods && result.foods.food){
+                const foodArray  = Array.isArray(result.foods.food) ? result.foods.food : [result.foods.food];
+                const formattedResults = foodArray.map((food: any)=> {
+                    const desc = food.food_description || "";
+                    
+                    const calMatch = desc.match(/Calories:\s*([\d.]+)\s*kcal/i);
+                    const fatMatch = desc.match(/Fat:\s*([\d.]+)\s*g/i);
+                    const carbMatch = desc.match(/Carbs?:\s*([\d.]+)\s*g/i);
+                    const proMatch = desc.match(/Protein:\s*([\d.]+)\s*g/i);
+
+                    const rawCalories = calMatch ? parseFloat(calMatch[1]) : 0;
+                    const rawFat = fatMatch ? parseFloat(fatMatch[1]) : 0;
+                    const rawCarbs = carbMatch ? parseFloat(carbMatch[1]) : 0;
+                    const rawProtein = proMatch ? parseFloat(proMatch[1]) : 0;
+
+                    return {
+                        id: food.food_id || Date.now().toString() + Math.random(),
+                        name: formatFoodName(food.food_name || "Unknown Food"),
+                        brand: formatFoodName(food.brand_name),
+                        calories: Math.round(rawCalories),
+                        protein: parseMacro(rawProtein) / 100,
+                        carbs: parseMacro(rawCarbs) / 100,
+                        fat: parseMacro(rawFat) / 100,
+                        baseCalories: rawCalories / 100,
+                        servingSize: 100,
+                        servingName: "100g",
+                        quantity: 1,
+                        mealType: (selectedCategory as string) || "Breakfast",
+                        date: dayjs().format('YYYY-MM-DD')
+                    };
+                });
+                setSearchResults(formattedResults);
+            } else {
+                alert("No foods found matching that search.");
+                setSearchResults([]);
+            }
+        } catch (error) {
+            console.error("Text search failed:", error);
+            alert("Network error while searching.");
+        } finally{
+            setIsSearchingText(false);
+        }
+   }
+        
    // Scan the Barcode
    async function handleBarcodeScanned({data}: {data: string}){
 
@@ -354,6 +442,8 @@ export default function AddFoodScreen(){
                 placeholderTextColor= '#00f2ff'
                 onChangeText={(text) => setSearchQuery(text)}
                 value={searchQuery}
+                returnKeyType = "search"
+                onSubmitEditing={()=> searchFoodAPI(searchQuery)}
                 />
                 <View style={styles.glowLine}/>
             </View>
@@ -362,7 +452,8 @@ export default function AddFoodScreen(){
 
         {/* Results*/}
             <ScrollView style={styles.resultsContainer}>
-                {filteredFood.map((item) =>(
+                {isSearchingText && <ActivityIndicator size='large' color='#00f2ff' style={{marginTop: 20}}/>}
+                {!isSearchingText && searchResults.map((item) =>(
                     <FoodResultItem
                     key={item.id}
                     item={item}

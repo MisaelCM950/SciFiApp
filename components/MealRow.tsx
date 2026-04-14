@@ -12,9 +12,9 @@ export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:str
 
     let formattedServing = "";
     const q = meal.quantity || 1;
-    if (meal.quantity === '1 g') formattedServing = `${q} g`;
-    else if (meal.quantity === '1 oz') formattedServing = `${q} oz`;
-    else if (meal.quantity === '1 kg') formattedServing = `${q} kg`;
+    if (meal.unitName === '1 g') formattedServing = `${q} g`;
+    else if (meal.unitName=== '1 oz') formattedServing = `${q} oz`;
+    else if (meal.unitName=== '1 kg') formattedServing = `${q} kg`;
     else{
         formattedServing = q ===  1 ? meal.unitName : `${q} x ${meal.unitName}`;
     }
