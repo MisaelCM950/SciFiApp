@@ -14,6 +14,11 @@ interface Meal{
     brand?: string;
     mealType: string;
     date: string;
+    originalGramWeight?: number;
+    baseProtein? : number;
+    baseCarbs? : number;
+    baseFat? : number;
+    fatSecretId?: string;
 }
 
 interface FoodContextType{
@@ -29,7 +34,7 @@ interface FoodContextType{
     setFatGoal:(val: string) => void;
     setProteinGoal:(val: string) => void;
     setSelectedDate: (date: string) => void;
-    addCalories: (food: Meal) => void;
+    addMeal: (food: Meal) => void;
     deleteMeal: (id: string) => void;
     updateMeal: (food: Meal) => void;
 }
@@ -99,7 +104,7 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
             setAllMeals((prevMeals)=> prevMeals.filter((meal) => meal.id !== id));
     };
 //
-    const addCalories = (food: Meal) => {
+    const addMeal = (food: Meal) => {
         setAllMeals((prevMeals) => [...prevMeals, food])
     };
 
@@ -112,7 +117,7 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
         <FoodContext.Provider value = {{
             totalCalories, 
             meals: filteredMeals, 
-            addCalories, 
+            addMeal, 
             deleteMeal, 
             updateMeal, 
             setSelectedDate, 

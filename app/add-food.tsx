@@ -28,7 +28,7 @@ function parseMacro(value: any){
 
 export default function AddFoodScreen(){
 
-    const {addCalories} = useFood();
+    const {addMeal} = useFood();
    const router = useRouter(); 
    const {selectedCategory} = useLocalSearchParams();
    const [searchQuery, setSearchQuery] = useState('');
@@ -97,7 +97,62 @@ export default function AddFoodScreen(){
    // USDA API for Search Feature
    const [searchResults, setSearchResults] = useState<any[]>([]);
    const [isSearchingText, setIsSearchingText] = useState(false);
+   const [AISpinner, setAISpinner] = useState(false)
+   async function fallbackToAI(query: string){
+        try{
+            setAISpinner(true)
+            console.log("Asking AI to estimate:", query);
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_KEY}`,
+                    'Content-Type' : 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: "You are an expert nutritionist API. The user searched for a food that is missing from the database. Estimate the macros for exactly 100g of this food. Respond ONLY with a valid JSON object using these exact keys: name (string), calories (number), protein (number), carbs (number), fat (number). Make the name clean and capitalized"
+                        },
+                        {role: 'user', content: query}
+                    ],
+                    temperature: 0.2
+                })
+            });
+            const data = await response.json();
+            const macroData = JSON.parse(data.choices[0].message.content);
 
+            const aiResult = {
+               id: "AI-" + Date.now().toString(),
+               name: formatFoodName(macroData.name) + " (AI Estimate)",
+               brand: "AI Generated",
+               calories: Math.round(macroData.calories),
+               protein: parseMacro(macroData.protein) / 100,
+               carbs: parseMacro(macroData.carbs) / 100,
+               fat: parseMacro(macroData.fat) / 100,
+               baseCalories: macroData.calories / 100,
+               servingSize: 100,
+               servingName: "100g",
+               quantity: 1,
+               mealType: (selectedCategory as string) || "Breakfast",
+               date: dayjs().format('YYYY-MM-DD')
+           };
+           router.push({
+            pathname: '/add-food-setting',
+            params: {
+                ...aiResult,
+                selectedCategory
+            }
+           });
+        } catch (error) {
+            console.error("AI Fallback failed:", error);
+            alert("AI could not estimate the food");
+        } finally {
+            setIsSearchingText(false)
+            setAISpinner(false)
+        }
+   }
    async function searchFoodAPI(query: string){
         if (!query.trim()) return;
 
@@ -130,7 +185,7 @@ export default function AddFoodScreen(){
             const accessToken = tokenData.access_token;
 //
             const safeQuery = encodeURIComponent(query);
-            const searchResponse = await fetch(`https://platform.fatsecret.com/rest/server.api?method=foods.search&search_expression=${safeQuery}&format=json&max_results=20`, {
+            const searchResponse = await fetch(`https://platform.fatsecret.com/rest/server.api?method=foods.search&search_expression=${safeQuery}&format=json&max_results=10&region=MX`, {
                 method: 'GET',
                 headers: {'Authorization': `Bearer ${accessToken}`}
             });
@@ -147,6 +202,9 @@ export default function AddFoodScreen(){
                     const fatMatch = desc.match(/Fat:\s*([\d.]+)\s*g/i);
                     const carbMatch = desc.match(/Carbs?:\s*([\d.]+)\s*g/i);
                     const proMatch = desc.match(/Protein:\s*([\d.]+)\s*g/i);
+                    const servingMatch = desc.match(/Per\s*([\d.]+)\s*([a-zA-Z]+)/i)
+                    const rawServingSize = servingMatch ? parseFloat(servingMatch[1]) : 100;
+                    const rawServingName = servingMatch ? servingMatch[2] : 'g';
 
                     const rawCalories = calMatch ? parseFloat(calMatch[1]) : 0;
                     const rawFat = fatMatch ? parseFloat(fatMatch[1]) : 0;
@@ -158,12 +216,12 @@ export default function AddFoodScreen(){
                         name: formatFoodName(food.food_name || "Unknown Food"),
                         brand: formatFoodName(food.brand_name),
                         calories: Math.round(rawCalories),
-                        protein: parseMacro(rawProtein) / 100,
-                        carbs: parseMacro(rawCarbs) / 100,
-                        fat: parseMacro(rawFat) / 100,
-                        baseCalories: rawCalories / 100,
-                        servingSize: 100,
-                        servingName: "100g",
+                        protein: parseMacro(rawProtein) / rawServingSize,
+                        carbs: parseMacro(rawCarbs) / rawServingSize,
+                        fat: parseMacro(rawFat) / rawServingSize,
+                        baseCalories: rawCalories / rawServingSize,
+                        servingSize: rawServingSize,
+                        servingName: rawServingName,
                         quantity: 1,
                         mealType: (selectedCategory as string) || "Breakfast",
                         date: dayjs().format('YYYY-MM-DD')
@@ -413,7 +471,7 @@ export default function AddFoodScreen(){
             mealType: (selectedCategory as string)|| 'Breakfast'
         };
 
-        addCalories(newMeal);
+        addMeal(newMeal);
         setIsAnalyzing(false)
         router.back();
         
@@ -444,6 +502,7 @@ export default function AddFoodScreen(){
                 value={searchQuery}
                 returnKeyType = "search"
                 onSubmitEditing={()=> searchFoodAPI(searchQuery)}
+                selectTextOnFocus={true}
                 />
                 <View style={styles.glowLine}/>
             </View>
@@ -488,12 +547,33 @@ export default function AddFoodScreen(){
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.optionButtons} onPress={openScanner}>
                         <FontAwesome        
-                            name= 'camera'
+                            name= 'barcode'
                             size= {24}
                             color= "#00f2ff"
                         />
                     </TouchableOpacity>
                 </View>
+
+                {AISpinner && (
+                    <View style={[StyleSheet.absoluteFillObject, {
+                        backgroundColor: 'rgba(0, 26, 28, 0.8)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 999
+                    }]}>
+                        <ActivityIndicator size="large" color="#00f2ff"/>
+                    </View>
+                )}
+                 
+                <View style={{alignItems: 'center', marginBottom: 20}}>
+                    {searchResults.length > 0 && !isSearchingText &&(
+                    <TouchableOpacity style={styles.optionButtons} onPress={()=> fallbackToAI(searchQuery)}>
+                            <Text style={[styles.buttonText, {fontSize: 15}]}>AI Estimate</Text>
+                    </TouchableOpacity>
+                    )}
+                    
+                </View>
+
             </ScrollView>
             
             {/* Modal Camera Screen */}
@@ -522,6 +602,7 @@ export default function AddFoodScreen(){
                             <Text style={{color: "#00f2ff", marginTop: 10, fontWeight: 'bold'}}>Looking up food...</Text>
                         </View>
                     )}
+                        
 
                     <TouchableOpacity style={{position: 'absolute', top: 50, right: 20, backgroundColor: '#333', padding: 15, borderRadius: 50}}
                     onPress={()=> setIsScanning(false)}

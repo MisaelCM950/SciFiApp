@@ -6,7 +6,7 @@ import { useFood } from '../storage';
 export default function AddFoodSettingScreen(){
     const {selectedCategory} = useLocalSearchParams();
     const router = useRouter(); 
-    const {addCalories, selectedDate} = useFood();
+    const {addMeal, selectedDate} = useFood();
 
 
     const [name, setName] = useState('');
@@ -36,7 +36,7 @@ export default function AddFoodSettingScreen(){
             mealType: selectedCategory as string,
             date: selectedDate
         };
-        addCalories(newFood);
+        addMeal(newFood);
         router.dismissAll();
     }   
 
