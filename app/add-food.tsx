@@ -28,10 +28,51 @@ function parseMacro(value: any){
 
 export default function AddFoodScreen(){
 
-    const {addMeal} = useFood();
+    const {addMeal, meals} = useFood();
+    const uniqueRecentFoods = Array.from(
+        new Map(meals.map(meal => [meal.name, meal])).values()
+    )
    const router = useRouter(); 
    const {selectedCategory} = useLocalSearchParams();
    const [searchQuery, setSearchQuery] = useState('');
+   const [suggestions, setSuggestions] = useState<any[]>([]);
+
+   const handleTextChange = (text: any) => {
+    setSearchQuery(text);
+    if (text.trim() === ''){
+        setSuggestions([]);
+        return;
+    }
+    const matches = uniqueRecentFoods.filter((meal) =>
+        meal.name.toLocaleLowerCase().includes(text.toLowerCase())
+    );
+    setSuggestions(matches.slice(0,4));
+   }
+
+   const handleSuggestionClick =(meal: any)=> {
+    router.push({
+        pathname: '/add-food-setting',
+        params: {
+            id: Date.now().toString(),
+            fatSecretId: meal.fatSecretId,
+            name: meal.name,
+            brand: meal.brand,
+            calories: meal.calories,
+            baseCalories: meal.baseCalories,
+            protein: meal.protein,
+            carbs: meal.carbs,
+            fat: meal.fat,
+            baseProtein: meal.baseProtein,
+            baseCarbs: meal.baseCarbs,
+            baseFat: meal.baseFat,
+            unitName: meal.unitName,
+            originalGramWeight: meal.originalGramWeight,
+            servingName: meal.servingName,
+            servingSize: meal.servingSize,
+            isEditing: 'false'
+        }
+    });
+   };
    
    //Searching Food
    const filteredFood = FOOD_DATABASE.filter((item) =>{
@@ -216,10 +257,10 @@ export default function AddFoodScreen(){
                         name: formatFoodName(food.food_name || "Unknown Food"),
                         brand: formatFoodName(food.brand_name),
                         calories: Math.round(rawCalories),
-                        protein: parseMacro(rawProtein) / rawServingSize,
-                        carbs: parseMacro(rawCarbs) / rawServingSize,
-                        fat: parseMacro(rawFat) / rawServingSize,
-                        baseCalories: rawCalories / rawServingSize,
+                        protein: parseMacro(rawProtein),
+                        carbs: parseMacro(rawCarbs),
+                        fat: parseMacro(rawFat),
+                        baseCalories: rawCalories,
                         servingSize: rawServingSize,
                         servingName: rawServingName,
                         quantity: 1,
@@ -498,7 +539,7 @@ export default function AddFoodScreen(){
                 <TextInput style={styles.searchInput} 
                 placeholder='Add Food' 
                 placeholderTextColor= '#00f2ff'
-                onChangeText={(text) => setSearchQuery(text)}
+                onChangeText={handleTextChange}
                 value={searchQuery}
                 returnKeyType = "search"
                 onSubmitEditing={()=> searchFoodAPI(searchQuery)}
@@ -506,6 +547,20 @@ export default function AddFoodScreen(){
                 />
                 <View style={styles.glowLine}/>
             </View>
+            {suggestions.length > 0 && (
+                <View style={styles.suggestionBox}>
+                    {suggestions.map((meal)=> (
+                        <TouchableOpacity
+                            key={meal.id}
+                            style={styles.suggestionItem}
+                            onPress={()=> handleSuggestionClick(meal)}
+                        >
+                            <Text style={styles.suggestionText}>{meal.name}</Text>
+                            <Text style={styles.suggestionDetails}>{meal.brand} {meal.calories} kcal</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
 
             <Text style={styles.debugText}>SEARCHING FOR: {searchQuery.toUpperCase()}</Text>
 
@@ -617,6 +672,31 @@ export default function AddFoodScreen(){
     
 )};
 const styles = StyleSheet.create({
+    suggestionBox: {
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderRadius: 10,
+        padding: 10,
+        marginTop: 5,
+        width: "100%",
+        borderColor: "rgba(255,255,255,0.1)",
+        borderWidth: 1,
+    },
+    suggestionItem: {
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.1)'
+    },
+    suggestionText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    suggestionDetails: {
+        color: '#00f2ff',
+        fontSize: 12,
+        marginTop: 2,
+    },
+
     scannerContainer: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',

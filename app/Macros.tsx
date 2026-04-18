@@ -12,9 +12,9 @@ export default function MacroScreen(){
    const FAT_GOAL = Number(fatGoal) || 80;
    const PROTEIN_GOAL = Number(proteinGoal) || 150;
 
-    const totalCarbs = meals.reduce((sum, meal) => sum + ((meal.carbs || 0) * (meal.quantity || 1)), 0);
-    const totalFat = meals.reduce((sum, meal) => sum + ((meal.fat || 0) * (meal.quantity || 1)), 0);
-    const totalProtein = meals.reduce((sum, meal) => sum + ((meal.protein || 0) * (meal.quantity || 1)), 0);
+    const totalCarbs = meals.reduce((sum, meal) => sum + ((meal.carbs || 0)), 0);
+    const totalFat = meals.reduce((sum, meal) => sum + ((meal.fat || 0)), 0);
+    const totalProtein = meals.reduce((sum, meal) => sum + ((meal.protein || 0)), 0);
 
     const totalMacros = totalCarbs + totalFat + totalProtein;
 

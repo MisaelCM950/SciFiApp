@@ -72,6 +72,7 @@ const styles= StyleSheet.create({
     borderTopColor: THEME.color.border,
  },
  leftColumn:{
+    flex: 1,
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: 2,
