@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { THEME } from '../constants/theme';
 
 interface Props{
@@ -10,7 +10,10 @@ interface Props{
 export default function FoodResultItem({item, onPress}: Props){
     return(
         <TouchableOpacity style={styles.resultItem} onPress={onPress}>
-            <Text style={styles.resultText}>{item.name}</Text>
+            <View style={{display: 'flex', flexDirection: 'column'}}>
+                <Text style={styles.resultText}>{item.name}</Text>
+                <Text style={[styles.resultText, {color: '#fff', fontSize: 15, fontWeight: '200'}]}>{item.brand}</Text>
+            </View>
             <Text style={styles.resultCalories}>{item.calories} Kcal</Text>
         </TouchableOpacity>
     );

@@ -27,6 +27,7 @@ interface FoodContextType{
     selectedDate: string;
     calorieGoal: string;
     carbGoal: string;
+    allMeals: Meal[];
     fatGoal: string;
     proteinGoal: string;
     setCalorieGoal: (val: string) => void;
@@ -117,6 +118,7 @@ export function FoodProvider({children}: {children: React.ReactNode}) {
         <FoodContext.Provider value = {{
             totalCalories, 
             meals: filteredMeals, 
+            allMeals,
             addMeal, 
             deleteMeal, 
             updateMeal, 

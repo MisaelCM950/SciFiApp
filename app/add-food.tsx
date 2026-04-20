@@ -28,9 +28,9 @@ function parseMacro(value: any){
 
 export default function AddFoodScreen(){
 
-    const {addMeal, meals} = useFood();
+    const {addMeal, allMeals} = useFood();
     const uniqueRecentFoods = Array.from(
-        new Map(meals.map(meal => [meal.name, meal])).values()
+        new Map(allMeals.map(meal => [meal.name, meal])).values()
     )
    const router = useRouter(); 
    const {selectedCategory} = useLocalSearchParams();
@@ -547,25 +547,21 @@ export default function AddFoodScreen(){
                 />
                 <View style={styles.glowLine}/>
             </View>
-            {suggestions.length > 0 && (
-                <View style={styles.suggestionBox}>
-                    {suggestions.map((meal)=> (
-                        <TouchableOpacity
-                            key={meal.id}
-                            style={styles.suggestionItem}
-                            onPress={()=> handleSuggestionClick(meal)}
-                        >
-                            <Text style={styles.suggestionText}>{meal.name}</Text>
-                            <Text style={styles.suggestionDetails}>{meal.brand} {meal.calories} kcal</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            )}
+            
 
             <Text style={styles.debugText}>SEARCHING FOR: {searchQuery.toUpperCase()}</Text>
 
         {/* Results*/}
             <ScrollView style={styles.resultsContainer}>
+                {suggestions.length > 0 && suggestions.map((meal)=> (
+                        <FoodResultItem
+                            key={meal.id}
+                            item={meal}
+                            onPress={()=> handleSuggestionClick(meal)}
+                        >
+                        </FoodResultItem>
+                    ))}
+
                 {isSearchingText && <ActivityIndicator size='large' color='#00f2ff' style={{marginTop: 20}}/>}
                 {!isSearchingText && searchResults.map((item) =>(
                     <FoodResultItem
@@ -672,31 +668,6 @@ export default function AddFoodScreen(){
     
 )};
 const styles = StyleSheet.create({
-    suggestionBox: {
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderRadius: 10,
-        padding: 10,
-        marginTop: 5,
-        width: "100%",
-        borderColor: "rgba(255,255,255,0.1)",
-        borderWidth: 1,
-    },
-    suggestionItem: {
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.1)'
-    },
-    suggestionText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    suggestionDetails: {
-        color: '#00f2ff',
-        fontSize: 12,
-        marginTop: 2,
-    },
-
     scannerContainer: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
