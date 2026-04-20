@@ -9,8 +9,9 @@ interface Props{
 
 export default function FoodResultItem({item, onPress}: Props){
     return(
+        
         <TouchableOpacity style={styles.resultItem} onPress={onPress}>
-            <View style={{display: 'flex', flexDirection: 'column'}}>
+            <View style={{display: 'flex', flexDirection: 'column', flex: 1}}>
                 <Text style={styles.resultText}>{item.name}</Text>
                 <Text style={[styles.resultText, {color: '#fff', fontSize: 15, fontWeight: '200'}]}>{item.brand}</Text>
             </View>
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         paddingHorizontal: 10,
         borderBottomWidth: 1,
-        borderBottomColor: THEME.color.border
+        borderBottomColor: THEME.color.border,   
     },
     resultText:{
         color: '#fff',
