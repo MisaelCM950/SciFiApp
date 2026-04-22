@@ -1,4 +1,4 @@
-import { formatFoodName, parseMacro } from '@/app/helpers';
+import { formatFoodName, parseMacro } from '@/shared/helpers';
 import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';

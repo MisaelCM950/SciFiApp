@@ -9,32 +9,39 @@ import { useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { FOOD_DATABASE } from '../constants/Food-data';
 
 export default function AddFoodScreen(){
-
-   const {selectedCategory} = useLocalSearchParams();
-    // 1. Brought in allMeals since app has been installed
+    const router = useRouter(); 
+    const {selectedCategory} = useLocalSearchParams();
+// Brought in allMeals since app has been installed
     const {allMeals} = useFood();
-// 2. Created the variable to destroy all the duplicates
+// Created the variable to destroy all the duplicates
     const uniqueRecentFoods = Array.from(
         new Map(allMeals.map(meal => [meal.name, meal])).values()
     )
+    
     const {
-        searchQuery,
-        suggestions,
-        searchResults,
-        isSearchingText,
-        AISpinner,
-        handleTextChange,
-        searchFoodAPI,
-        fallbackToAI
+        searchQuery, suggestions, searchResults, isSearchingText, AISpinner, handleTextChange,
+        searchFoodAPI, fallbackToAI
     } = useFoodSearch(uniqueRecentFoods, selectedCategory);
-   const router = useRouter(); 
+   
     const {startRecording, stopRecording, isRecording, isAnalyzing, recording} = useVoiceToMacro();
 
+       // Open Camera
+   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+   const [isScanning, setIsScanning] = useState(false);
+   
+   async function openScanner(){
+    if(!cameraPermission?.granted) {
+        const permission = await requestCameraPermission();
+        if(!permission.granted){
+            alert("We need camera permission to scan barcodes!");
+            return;
+        }
+    }
+    setIsScanning(true);
+   }
 
-// 4. send customer properties of the meal object and push to the settings screen
    const handleSuggestionClick =(meal: any)=> {
     router.push({
         pathname: '/add-food-setting',
@@ -59,43 +66,8 @@ export default function AddFoodScreen(){
         }
     });
    };
-   
-   //Searching Food
-   const filteredFood = FOOD_DATABASE.filter((item) =>{
-    const itemName = item.name.toLowerCase();
-    const userTyped = searchQuery.toLowerCase();
-    
-    return itemName.includes(userTyped);
-   });
 
 
-   
-
-
-   // --- Scanner Animation Engine ---
-
-   
-
-   
-
-   // Open Camera
-   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-   const [isScanning, setIsScanning] = useState(false);
-   async function openScanner(){
-    if(!cameraPermission?.granted) {
-        const permission = await requestCameraPermission();
-        if(!permission.granted){
-            alert("We need camera permission to scan barcodes!");
-            return;
-        }
-    }
-    setIsScanning(true);
-   }
-    
-   // USDA API for Search Feature
-   
-   
-   
 
     return(
  
@@ -127,7 +99,6 @@ export default function AddFoodScreen(){
 
         {/* Results*/}
             <ScrollView style={styles.resultsContainer}>
-                {/*5. If the suggestions array is longer than 1 item, map through them and use my foodResultItem component*/}
                 {suggestions.length > 0 && suggestions.map((meal)=> (
                         <FoodResultItem
                             key={meal.id}
@@ -137,6 +108,7 @@ export default function AddFoodScreen(){
                     ))}
 
                 {isSearchingText && <ActivityIndicator size='large' color='#00f2ff' style={{marginTop: 20}}/>}
+                
                 {!isSearchingText && searchResults.map((item) =>(
                     <FoodResultItem
                     key={item.id}
@@ -150,6 +122,7 @@ export default function AddFoodScreen(){
                         });
                     }}/>
                 ))}
+                {/*Action Buttons (Custom, Voice, Scan)*/}
                 <View style={{gap: 15, flexDirection: 'row', justifyContent: 'center'}}>
                     <TouchableOpacity style={styles.optionButtons} onPress={() => router.push({
                         pathname: '/custom-food',
@@ -211,8 +184,6 @@ export default function AddFoodScreen(){
     
 )};
 const styles = StyleSheet.create({
-
-
     optionButtons: {
         marginTop: 30,
         borderWidth: 1,
@@ -220,27 +191,8 @@ const styles = StyleSheet.create({
         padding: 15,
         borderColor: THEME.color.accent
     },
-    resultText:{
-        color: '#fff',
-        fontSize: 18,
-        fontWeight:'bold'
-    },
-    resultCalories: {
-        color: '#00f2ff',
-        fontSize: 16,
-        fontWeight: 'bold'
-    },
     buttonContainer: {width: '100%',paddingHorizontal: 20, alignItems: 'flex-start'},
     inputContainer:{width:'80%', marginBottom: 20},
-    resultItem:{
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        paddingVertical: 15,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#004042'
-    },
     container: {flex: 1, backgroundColor: '#001a1c', alignItems: 'center', paddingTop: 5},
     title:{color: '#fff', fontSize:24, fontWeight: 'bold', letterSpacing: 2, marginBottom: 40},
     backButton:{borderColor: "#00f2ff", borderWidth: 1, padding: 15, borderStyle: 'dashed'},

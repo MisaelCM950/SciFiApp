@@ -1,4 +1,4 @@
-import { Macrobar } from '@/components/barchart';
+import { Macrobar } from '@/components/Barchart';
 import { THEME } from '@/constants/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -7,6 +7,8 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { useFood } from '../storage';
 
 export default function AddFoodSettingScreen() {
+    
+    const router = useRouter(); 
     // 1. Receive properties
     const {id, name, calories, brand, carbs, fat, protein, baseCalories, quantity: savedQuantity, 
         selectedCategory, isEditing, servingSize, servingName, unitName: savedUnitName, 
@@ -17,6 +19,8 @@ export default function AddFoodSettingScreen() {
 
     const safeServingAmount = parseFloat(servingSize as string) || 1;
 
+    const fallbackMultiplier = savedGramWeight ? Number(savedGramWeight) : (parseFloat(servingSize as string) || 1);
+
     const initialDropdownList = [    
         {label: '1 g', gramMultiplier: 1},
         {label: '1 oz', gramMultiplier: 28.35},
@@ -26,7 +30,7 @@ export default function AddFoodSettingScreen() {
     if (servingName && servingName !== 'g' && servingName !== 'oz') {
         initialDropdownList.unshift({ 
             label: servingName as string, 
-            gramMultiplier: safeServingAmount
+            gramMultiplier: fallbackMultiplier 
         });
     }
 
@@ -113,7 +117,7 @@ export default function AddFoodSettingScreen() {
     }, [id]);
     
     const {addMeal, updateMeal, selectedDate} = useFood();
-    const router = useRouter(); 
+    
 
     // --- NEW MATH LOGIC ---
     const baseCal = Number(baseCalories) || Number(calories) || 0;
@@ -148,7 +152,7 @@ export default function AddFoodSettingScreen() {
     const handleAdd = () => {
         const mealData = {
             id: isEditing === 'true' ? (id as string) : Date.now().toString(),
-            fatSecretId: isEditing === 'true' ? (fatSecretId as string) : (id as string),
+            fatSecretId: fatSecretId ? (fatSecretId as string) : (id as string),
             name: name as string,
             baseCalories: baseCal, 
             carbs: c, 

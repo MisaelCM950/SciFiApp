@@ -1,4 +1,4 @@
-import { formatFoodName } from '@/app/helpers';
+import { formatFoodName } from '@/shared/helpers';
 import { useFood } from '@/storage';
 import dayjs from 'dayjs';
 import { Audio } from 'expo-av';

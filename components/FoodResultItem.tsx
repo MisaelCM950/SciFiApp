@@ -8,6 +8,7 @@ interface Props{
 }
 
 export default function FoodResultItem({item, onPress}: Props){
+
     return(
         
         <TouchableOpacity style={styles.resultItem} onPress={onPress}>

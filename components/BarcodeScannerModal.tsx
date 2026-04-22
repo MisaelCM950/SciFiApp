@@ -1,4 +1,4 @@
-import { formatFoodName, parseMacro } from '@/app/helpers';
+import { formatFoodName, parseMacro } from '@/shared/helpers';
 import dayjs from 'dayjs';
 import { CameraView } from 'expo-camera';
 import { useLocalSearchParams, useRouter } from 'expo-router';
