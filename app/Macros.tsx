@@ -1,5 +1,7 @@
 import { MacroContainer } from '@/components/DailyMacroContainer';
+import { THEME } from '@/constants/theme';
 import { useFood } from '@/storage';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -31,7 +33,9 @@ export default function MacroScreen(){
     const proteinLeft = PROTEIN_GOAL - Math.round(totalProtein);
    
     return(
- 
+        <View style={styles.root}>
+ <Image source={require('@/assets/images/hud-bg.png.png')} style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
+     contentFit='fill' cachePolicy='memory-disk'/>
         <View style={styles.container}>
                    {/*Back Button*/}
             <View style={styles.buttonContainer}>
@@ -49,7 +53,7 @@ export default function MacroScreen(){
                 <View style={styles.sectionContainer}>
                     <View style={styles.calorieRow}>
                     {/* Circle */}
-                        <View>
+                        <View style={{borderWidth: 5, borderColor: THEME.color.accent, paddingVertical: 20, paddingHorizontal: 12, borderRadius: 50}}>
                             <Text style={styles.circlePercentage}>{Math.round(caloriePct)}%</Text>
                         </View>
                     {/* Text next to it */}
@@ -91,10 +95,14 @@ export default function MacroScreen(){
                 /> 
             </View>
         </View>
-
+</View>
     
 )};
 const styles = StyleSheet.create({
+    root: {
+        flex:1,
+        backgroundColor: THEME.color.background
+    },
     statsText: {
         color: '#aaa',
         fontSize: 14,
@@ -107,7 +115,7 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     calorieTextContainer: {
-        flex: 1
+        flex: 1,
     },
     circlePercentage: {
         color: "#fff",
@@ -123,13 +131,15 @@ const styles = StyleSheet.create({
     width: '100%', 
     backgroundColor: 'rgba(255,255,255,0.04)',
     padding: 20,
+    borderWidth: 1,
+    borderColor: THEME.color.accent,
     borderRadius: 15,
     justifyContent: 'center',
     marginBottom: 20
     },
     buttonContainer: {width: '100%',paddingHorizontal: 20, alignItems: 'flex-start'},
     barContainer:{width:'95%', marginBottom: 20},
-    container: {flex: 1, backgroundColor: '#001a1c', alignItems: 'center', paddingTop: 70},
+    container: {flex: 1, backgroundColor: 'transparent', alignItems: 'center', paddingTop: 70},
     title:{color: '#fff', fontSize:24, fontWeight: 'bold', letterSpacing: 2, marginBottom: 40},
     backButton:{borderColor: "#00f2ff", borderWidth: 1, padding: 15, borderStyle: 'dashed'},
     backText: {color: '#00f2ff', fontWeight: 'bold'},

@@ -1,8 +1,9 @@
 import { useFood } from '@/storage';
 import dayjs from 'dayjs';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MealSection from '../../components/MealSection';
 import { THEME } from '../../constants/theme';
 
@@ -35,28 +36,13 @@ export default function CalTracker() {
     }
   };
 
-
-  useEffect(()=>{
-    setTimeout(()=>{
-      setIsLoading(false);
-    }, 3000);
-  }, []);
-
-  if(isLoading){
-    return(
-      <View style={styles.loadingContainer}>
-        <Image source={require('../../assets/images/splash-icon.png')}
-        style={styles.logo}/>
-        <Text style={styles.loaderText}>Loading...</Text>
-        <ActivityIndicator size='large' color={"#00f0ff"}/>
-      </View>
-    );
-  }
-
   return (
-  <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.mainWrapper}>
-    <View style={styles.container}>
-
+    <View style={styles.root}>
+  
+    <Image source={require('@/assets/images/hud-bg.png.png')} style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
+    contentFit='fill' cachePolicy='memory-disk'/>
+    <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.transparentScroll}>
+<View style = {styles.contentWrapper}>
         <View style={styles.dateHeader}>
           <TouchableOpacity onPress={() => changeDate('prev')} style={styles.arrowButton}>
             <Text style={styles.arrowText}>{"<"}</Text>
@@ -134,8 +120,9 @@ export default function CalTracker() {
         onDelete={deleteMeal}
         onAdd={() => router.push({pathname: '/add-food', params: {selectedCategory: 'Dinner'}})}
       />
-    </View>
+      </View>
   </ScrollView>
+  </View>
   );
 }
 
@@ -164,7 +151,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   root:{
-    flex:1
+    flex:1,
+    backgroundColor: THEME.color.background
+  },
+  transparentScroll: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  contentWrapper: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingTop: 70,
+    alignItems: 'center'
   },
   mainWrapper:{
     flex:1,
@@ -214,7 +212,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {flex: 1, backgroundColor: THEME.color.background , justifyContent: 'center', alignItems:'center' },
   loaderText: {color: '#00f0ff', letterSpacing: 5, marginBottom: 20, fontSize: 20, fontWeight: 'bold'},
-  container: { flex: 1, backgroundColor: THEME.color.background, justifyContent: 'flex-start', paddingTop: 70, alignItems: 'center' },
+  container: { flex: 1, justifyContent: 'flex-start', paddingTop: 70, alignItems: 'center', backgroundColor: '#001a1c' },
   number: { color: '#fff', fontSize: 48, fontWeight: 'bold' },
   logo: {width: 250, height: 250, marginBottom: 20, resizeMode: 'contain'}
 });

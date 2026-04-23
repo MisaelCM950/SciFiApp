@@ -51,13 +51,13 @@ const styles = StyleSheet.create({
     },
     sectionContainer: {
     width: '100%', 
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(0, 242, 255, 0.08)',
     padding: 20,
     borderRadius: 15,
     justifyContent: 'center',
     marginBottom: 20,
     borderWidth: 1.5,
-    borderColor: THEME.color.border
+    borderColor: '#00f2ff'
     },
     barFill:{
         height: '100%',

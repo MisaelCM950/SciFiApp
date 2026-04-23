@@ -1,13 +1,10 @@
+import { THEME } from '@/constants/theme';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { THEME } from '../constants/theme';
 
-
-
-export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:string) => void}) {
-  
+export default function MealRow ({meal, onDelete, isLast}: {meal: any, onDelete: (id:string) => void, isLast?: boolean}) {
     const router = useRouter();
 
     let formattedServing = "";
@@ -18,76 +15,98 @@ export default function MealRow ({meal, onDelete}: {meal: any, onDelete: (id:str
     else{
         formattedServing = q ===  1 ? meal.unitName : `${q} x ${meal.unitName}`;
     }
-  const renderRightActions = () => (
-    <View style={styles.deleteBackground}>
-      <Text style={styles.deleteText}>DELETE</Text>
-    </View>
+
+    const renderRightActions = () => (
+        <View style={styles.deleteBackground}>
+            <Text style={styles.deleteText}>DELETE</Text>
+        </View>
     );
+
     return (
       <Swipeable 
-      friction={1}
-      rightThreshold={60}
-      renderRightActions={renderRightActions} 
-      containerStyle={{ flex: 1, backgroundColor: '#003135' }} 
-      onSwipeableWillOpen={() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      onDelete(meal.id);
-  }}
-    >
-      <Pressable 
-      style={[styles.diaryItem, { borderTopWidth: 0, backgroundColor: THEME.color.background}]}
-      onPress={ () => router.push({
-        pathname: '/add-food-setting',
-        params: {...meal, selectedCategory: meal.mealType, isEditing: 'true'}
-      })}
+          friction={1}
+          rightThreshold={60}
+          renderRightActions={renderRightActions} 
+          containerStyle={{ flex: 1 }} 
+          onSwipeableWillOpen={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+              onDelete(meal.id);
+          }}
       >
-        <View style={styles.leftColumn}>
-          <Text style={styles.baseText}>{meal.name}</Text>
-          <View style={styles.detailsRow}>
-              <Text style={[styles.baseText, styles.details]}>{meal.brand}</Text> 
-              <Text style={[styles.baseText, styles.details]}>{formattedServing}</Text>
-          </View>
-        </View>
-        <Text style={styles.baseText}>{meal.calories}</Text>
-      </Pressable>
-    </Swipeable>
+          <Pressable 
+
+              style={[styles.diaryItem, isLast && {borderBottomWidth: 0}]}
+              onPress={ () => router.push({
+                  pathname: '/add-food-setting',
+                  params: {...meal, selectedCategory: meal.mealType, isEditing: 'true'}
+              })}
+          >
+              <View style={styles.leftColumn}>
+                  <Text style={styles.foodNameText}>{meal.name}</Text>
+                  <View style={styles.detailsRow}>
+                      <Text style={styles.detailsText}>{meal.brand}</Text> 
+                      <Text style={styles.detailsText}>{formattedServing}</Text>
+                  </View>
+              </View>
+              <Text style={styles.calorieText}>{meal.calories}</Text>
+          </Pressable>
+      </Swipeable>
     );
-    };
+};
 
 const styles= StyleSheet.create({
-    baseText: {fontSize: 18, color:'#fff'},
-    details:{opacity:0.5},
+    diaryItem: {
+        flexDirection: 'row', 
+        width: '100%',  
+        paddingHorizontal: 20, 
+        paddingVertical: 15,
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: THEME.color.accent, 
+        backgroundColor: 'transparent', 
+    },
+    leftColumn:{
+        flex: 1,
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 4,
+    },
+
+    foodNameText: {
+        fontSize: 16, 
+        color: '#fff',
+    },
     detailsRow:{
-    flexDirection: 'row',
-    gap: 4,
-  },
-  diaryItem: {
-    flexDirection: 'row', 
-    width: '100%',  
-    paddingHorizontal: 20, 
-    paddingVertical: 15,
-    justifyContent: 'space-between', 
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: THEME.color.border,
- },
- leftColumn:{
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: 2,
-  },
-  deleteText: {
-  color: 'white',
-  fontWeight: 'bold',
-  fontSize: 16,
-},
- deleteBackground: {
-  backgroundColor: THEME.color.danger,
-  justifyContent: 'center',
-  alignItems: 'flex-end',
-  paddingRight: 30,
-  height: '100%', 
-  width: '100%'
-},
-})
+        flexDirection: 'row',
+        gap: 8,
+    },
+    detailsText:{
+        color: '#00f2ff',
+        opacity: 0.6,
+        fontSize: 14,
+        textTransform: 'uppercase', 
+    },
+    calorieText: {
+        fontSize: 18,
+        color: '#00f2ff', 
+        fontWeight: 'bold',
+        textShadowColor: 'rgba(0, 242, 255, 0.8)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 8,
+    },
+    deleteBackground: {
+        backgroundColor: 'rgba(255, 68, 68, 0.8)',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        paddingRight: 30,
+        height: '100%', 
+        width: '100%'
+    },
+    deleteText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+        letterSpacing: 2,
+    },
+});

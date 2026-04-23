@@ -29,7 +29,8 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         paddingHorizontal: 10,
         borderBottomWidth: 1,
-        borderBottomColor: THEME.color.border,   
+        borderBottomColor: THEME.color.accent,   
+        backgroundColor: 'rgba(0, 242, 255, 0.08)',
     },
     resultText:{
         color: '#fff',

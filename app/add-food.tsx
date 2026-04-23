@@ -6,9 +6,10 @@ import { useVoiceToMacro } from '@/hooks/useVoiceToMacro';
 import { useFood } from '@/storage';
 import { FontAwesome } from '@expo/vector-icons';
 import { useCameraPermissions } from 'expo-camera';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function AddFoodScreen(){
     const router = useRouter(); 
@@ -59,6 +60,7 @@ export default function AddFoodScreen(){
             baseCarbs: meal.baseCarbs,
             baseFat: meal.baseFat,
             unitName: meal.unitName,
+            selectedCategory: selectedCategory,
             originalGramWeight: meal.originalGramWeight,
             servingName: meal.servingName,
             servingSize: meal.servingSize,
@@ -70,9 +72,12 @@ export default function AddFoodScreen(){
 
 
     return(
- 
-        <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.root}>
+            <Image source={require('@/assets/images/hud-bg-add-food.png')} style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
+                contentFit='fill' cachePolicy='memory-disk'/>
                    {/*Back Button*/}
+                   <View style={styles.container}>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.backButton}onPress={()=> router.back()}>
                     <Text style={styles.buttonText}>Back</Text>
@@ -179,23 +184,49 @@ export default function AddFoodScreen(){
                 isVisible={isScanning}
                 onClose={()=> setIsScanning(false)}
             />
+            </View>
         </View>
+        </TouchableWithoutFeedback>
 
     
 )};
 const styles = StyleSheet.create({
     optionButtons: {
         marginTop: 30,
-        borderWidth: 1,
-        borderStyle: 'dashed',
-        padding: 15,
-        borderColor: THEME.color.accent
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: "#00f2ff",
+        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: THEME.color.accent,
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 0.5,
+        shadowRadius: 5,
+        elevation: 3
     },
+    root:{
+    flex:1,
+    backgroundColor: THEME.color.background
+  },
     buttonContainer: {width: '100%',paddingHorizontal: 20, alignItems: 'flex-start'},
     inputContainer:{width:'80%', marginBottom: 20},
-    container: {flex: 1, backgroundColor: '#001a1c', alignItems: 'center', paddingTop: 5},
+    container: {flex: 1, backgroundColor: 'transparent', alignItems: 'center', paddingTop: 20},
     title:{color: '#fff', fontSize:24, fontWeight: 'bold', letterSpacing: 2, marginBottom: 40},
-    backButton:{borderColor: "#00f2ff", borderWidth: 1, padding: 15, borderStyle: 'dashed'},
+    backButton: {
+        marginTop: 30,
+        padding: 15,
+        borderWidth: 1,
+        borderColor: "#00f2ff",
+        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+        shadowColor: THEME.color.accent,
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 0.5,
+        shadowRadius: 5,
+        elevation: 3
+    },
     searchInput:{height:50, color: '#00f2ff', fontSize: 20, paddingHorizontal: 10},
     debugText: {color:'#005d61', fontSize: 12, marginTop: 10},
     buttonText: {color: '#00f2ff', fontWeight: 'bold'},

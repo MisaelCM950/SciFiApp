@@ -1,3 +1,5 @@
+import { THEME } from '@/constants/theme';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -43,6 +45,10 @@ export default function AddFoodSettingScreen(){
    
     return(
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible ={false}>
+            <View style={styles.root}>
+                <Image source={require('@/assets/images/hud-bg-custom.png')} style={[StyleSheet.absoluteFillObject, {width: '100%', height: '100%'}]}
+                    contentFit='fill' cachePolicy='memory-disk'
+                />
         <View style={styles.container}>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.buttonStyle}onPress={()=> router.back()}>
@@ -127,6 +133,7 @@ export default function AddFoodSettingScreen(){
                         </View>
                 </View>  
             </View>
+            </View>
         </View>
         </TouchableWithoutFeedback>
 
@@ -137,6 +144,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight:'bold'
+    },
+    root:  {  
+    flex:1,
+    backgroundColor: THEME.color.background
     },
     formContainer:{
         width: '90%'
@@ -149,7 +160,7 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         paddingHorizontal: 5,
         borderBottomWidth: 1,
-        borderBottomColor: '#004042',
+        borderBottomColor: 'rgba(0, 242, 255, 0.5)',
     },
     buttonContainer: {
         width: '100%',
@@ -164,12 +175,23 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1, 
-        backgroundColor: '#001a1c', 
+        backgroundColor: 'transparent', 
         alignItems: 'center',
-        paddingTop: 10
+        paddingTop: 25
         },
     title:{color: '#fff', fontSize:24, fontWeight: 'bold', letterSpacing: 2, marginBottom: 40},
-    buttonStyle:{borderColor: "#00f2ff", borderWidth: 1, padding: 15, borderStyle: 'dashed'},
+    buttonStyle:{
+        marginTop: 5,
+        padding: 15,
+        borderWidth: 1,
+        borderColor: "#00f2ff",
+        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+        shadowColor: THEME.color.accent,
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 0.5,
+        shadowRadius: 5,
+        elevation: 3
+    },
     optionInput:{
         height:50, 
         color: '#00f2ff', 

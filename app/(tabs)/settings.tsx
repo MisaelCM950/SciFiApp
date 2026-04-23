@@ -1,6 +1,7 @@
 import { THEME } from '@/constants/theme';
 import { useFood } from '@/storage';
 import { FontAwesome } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
@@ -39,27 +40,32 @@ export default function Settings() {
   )
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible ={false}>
-      <View style={styles.container}>
-            <Text style={styles.title}>Settings</Text>
-            <View style={styles.goalSettings}>
-                <View style={styles.headerRow}>
-                    <Text style={styles.baseText}>Customize Your Goals</Text>
-                    <TouchableOpacity onPress={()=> setIsLocked(!isLocked)} style={styles.lockButton} >
-                        <FontAwesome 
-                            name={isLocked ? 'lock' : 'unlock'}
-                            size={24}
-                            color={isLocked ? '#aaa' : "#00f2ff"}
-                        />
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.customGoals}>
-                    <GoalRow label='Calories' value={calorieGoal} setValue={setCalorieGoal} color='#aaa'/>
-                    <GoalRow label='Carbs' value={carbGoal} setValue={setCarbGoal}color = {THEME.color.accent} />
-                    <GoalRow label='Fat' value={fatGoal} setValue={setFatGoal} color='#ff4444'/>
-                    <GoalRow label='Protein' value={proteinGoal} setValue={setProteinGoal} color='#00ff44'/>
-                </View>
+        <View style={styles.root}>
+            <Image source={require('@/assets/images/hud-bg-settings.png')} style={[StyleSheet.absoluteFillObject, {width: '100%', height: '100%'}]}
+                contentFit='fill' cachePolicy='memory-disk'
+            />
+        <View style={styles.container}>
+                <Text style={styles.title}>Settings</Text>
+                <View style={styles.goalSettings}>
+                    <View style={styles.headerRow}>
+                        <Text style={styles.baseText}>Customize Your Goals</Text>
+                        <TouchableOpacity onPress={()=> setIsLocked(!isLocked)} style={styles.lockButton} >
+                            <FontAwesome 
+                                name={isLocked ? 'lock' : 'unlock'}
+                                size={24}
+                                color={isLocked ? '#aaa' : "#00f2ff"}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.customGoals}>
+                        <GoalRow label='Calories' value={calorieGoal} setValue={setCalorieGoal} color='#aaa'/>
+                        <GoalRow label='Carbs' value={carbGoal} setValue={setCarbGoal}color = {THEME.color.accent} />
+                        <GoalRow label='Fat' value={fatGoal} setValue={setFatGoal} color='#ff4444'/>
+                        <GoalRow label='Protein' value={proteinGoal} setValue={setProteinGoal} color='#00ff44'/>
+                    </View>
 
-          </View>
+            </View>
+        </View>
       </View>
 
     </TouchableWithoutFeedback>
@@ -68,10 +74,14 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
+    root:{
+    flex:1,
+    backgroundColor: THEME.color.background
+    },
   container: {
     flex: 1,
-    backgroundColor: THEME.color.background,
-    paddingTop: 70,
+    backgroundColor: 'transparent',
+    paddingTop: 100,
     alignItems: 'center',
   },
   headerRow: {
@@ -119,7 +129,8 @@ const styles = StyleSheet.create({
   optionContainer: {
     borderWidth: 1,
     width: '100%',
-    borderColor: THEME.color.border,
+    borderColor: "#00f2ff",
+    backgroundColor: 'rgba(0, 242, 255, 0.2)',
     padding: 10,
     flexDirection: 'row',
     justifyContent: 'space-between'
