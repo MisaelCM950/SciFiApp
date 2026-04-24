@@ -1,23 +1,38 @@
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Image } from 'expo-image';
+import { Asset } from 'expo-asset';
 import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image as RNImage, StyleSheet, Text, View } from 'react-native';
 
 export default function TabLayout() {
   const [isBooting, setIsBooting] = useState(true)
 
   useEffect(()=>{
+    async function bootSystem(){
+        try{
+        await Asset.loadAsync([
+            require('@/assets/images/hud-bg-add-food.png'),
+            require('@/assets/images/hud-bg-food-settings.png'),
+            require('@/assets/images/hud-bg-custom.png'),
+            require('@/assets/images/hud-bg-settings.png'),
+            require('@/assets/images/hud-bg.png.png')
+        ]);
+    } catch (error){
+        console.warn('Could not preload assets:', error)
+    } finally {
     setTimeout(()=>{
         setIsBooting(false);
-    }, 3000)
+    }, 3000);
+    }
+    }
+    bootSystem();
   }, [])
 
   if(isBooting) {
     return (
         <View style={styles.bootContainer}>
-            <Image source={require('@/assets/images/splash-icon.png')} style={styles.logo}/>
+            <RNImage source={require('@/assets/images/splash-icon.png')} style={styles.logo}/>
             <Text style={styles.bootText}>Loading...</Text>
             <ActivityIndicator size='large' color={'#00f2ff'}/>
         </View>
