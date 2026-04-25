@@ -1,3 +1,4 @@
+import { useSound } from '@/SoundContext';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useFood } from '../storage';
@@ -28,6 +29,8 @@ export function useFoodSettings(params: any) {
         const finalBaseCarbs = Number(baseCarbs) || Number(carbs) || 0;
         const finalBaseFat = Number(baseFat) || Number(fat) || 0;
 
+        
+
     if (smartMultiplier === 1 && baseCal > 9) {
         const macroMass = finalBaseProtein + finalBaseCarbs + finalBaseFat;
         smartMultiplier = macroMass > 0 ? Math.round(macroMass * 3) : 150; 
@@ -47,7 +50,7 @@ export function useFoodSettings(params: any) {
             gramMultiplier: fallbackMultiplier 
         });
     }
-
+    
     const [availableUnits, setAvailableUnits] = useState(initialDropdownList);
     const initialUnit = availableUnits.find(u => u.label === savedUnitName) || availableUnits[0];
     const [selectedUnit, setSelectedUnit] = useState(initialUnit);
@@ -86,7 +89,7 @@ export function useFoodSettings(params: any) {
     
                         const formattedUnits = rawServings.map((s: any)=>({
                             label: s.serving_description,
-                            gramMultiplier: parseFloat(s.metric_serving_amount) || 1
+                            gramMultiplier: parseFloat(s.metric_serving_amount) || fallbackMultiplier
                         }));
                         
                         formattedUnits.push({label: '1 g',  gramMultiplier: 1});
@@ -121,16 +124,19 @@ export function useFoodSettings(params: any) {
             }
             fetchDetailedServings();
         }, [id]);
-
+        
         const userTypedAmount = parseFloat(quantity) || 0;
         const trueGramWeight = userTypedAmount * selectedUnit.gramMultiplier;
-
+        
+        
         
     
         const baseCalPerGram = baseCal / originalServingGrams;
         const carbsPerGram = finalBaseCarbs / originalServingGrams;
         const fatPerGram = finalBaseFat / originalServingGrams;
         const proteinPerGram = finalBaseProtein / originalServingGrams;
+
+        
     
         const calculatedCalories = Math.round(baseCalPerGram * trueGramWeight) || 0;
         const c = Math.round(carbsPerGram * trueGramWeight * 10) / 10;
@@ -142,6 +148,9 @@ export function useFoodSettings(params: any) {
         const fatPct = totalMacros > 0 ? (f/totalMacros) * 100 : 0;
         const proteinPct = totalMacros > 0 ? (p/totalMacros) * 100: 0;
 
+        const {playSuccess} = useSound();
+
+        
         const handleAdd = () => {
                 const mealData = {
                     id: isEditing === 'true' ? (id as string) : Date.now().toString(),
@@ -167,9 +176,11 @@ export function useFoodSettings(params: any) {
                 if(isEditing === 'true') {
                     updateMeal(mealData);
                 } else {
-                    addMeal(mealData);
+                    addMeal(mealData);               
                 }
-                router.dismissAll();
+                    playSuccess();
+                    router.dismissAll()        
+    
             }   
 
             return {

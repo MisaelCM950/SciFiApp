@@ -23,6 +23,8 @@ export default function AddFoodSettingScreen() {
         );
     };
 
+    
+
     return(
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <View style={styles.root}>

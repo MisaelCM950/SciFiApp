@@ -1,4 +1,3 @@
-import { THEME } from '@/constants/theme';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface Props {
@@ -44,7 +43,7 @@ const styles = StyleSheet.create({
     barTrack:{
         flex: 1,
         height: 10,
-        backgroundColor: THEME.color.border,
+        backgroundColor: '#0a1e22',
         borderRadius: 5,
         marginHorizontal:10,
         overflow: 'hidden',

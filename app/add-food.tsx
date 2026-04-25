@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     searchInput:{height:50, color: '#00f2ff', fontSize: 20, paddingHorizontal: 10},
-    debugText: {color:'#005d61', fontSize: 12, marginTop: 10},
+    debugText: {color:'#ffffff', fontSize: 12, marginTop: 10},
     buttonText: {color: '#00f2ff', fontWeight: 'bold'},
     resultsContainer:{
         width: '100%',

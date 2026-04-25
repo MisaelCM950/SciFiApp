@@ -7,7 +7,7 @@ import { ActivityIndicator, Image as RNImage, StyleSheet, Text, View } from 'rea
 
 export default function TabLayout() {
   const [isBooting, setIsBooting] = useState(true)
-
+// Memory Management & Asset Preloading: 
   useEffect(()=>{
     async function bootSystem(){
         try{
